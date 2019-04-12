@@ -34,17 +34,17 @@ namespace Boids
             return new Vector3((float)x, (float)y, (float)z);
         }
 
-        public void CreateBoids(Transform parent, BoidSettings settings, int count)
+        public void CreateBoids(Transform parent, BoidSettings settings, GameObject prefab, int count)
         {
             System.Random rng = new System.Random(63948);
 
             for (int i = 0; i < count; ++i)
             {
-                GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                GameObject go = UnityEngine.Object.Instantiate(prefab);
                 go.transform.parent = parent;
                 go.transform.position = sampleUnitSphereVolume(rng) * radius;
                 go.transform.rotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), sampleUnitSphereSurface(rng));
-                go.transform.localScale.Set(0.1f, 0.1f, 0.1f);
+                go.transform.localScale.Set(1.0f, 1.0f, 1.0f);
 
                 Rigidbody rb = go.AddComponent<Rigidbody>();
                 rb.useGravity = false;

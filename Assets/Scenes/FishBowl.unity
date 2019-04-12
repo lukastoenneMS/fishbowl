@@ -320,6 +320,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00ab32d150f287d40b714a50e96e4f81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BoidPrefab: {fileID: 3713867872635992076, guid: 7c155ca52740c3040a4e060c3a6fade3,
+    type: 3}
   Count: 10
 --- !u!1 &984957130
 GameObject:
@@ -372,7 +374,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.02
+  near clip plane: 0.1
   far clip plane: 1000
   field of view: 60
   orthographic: 0

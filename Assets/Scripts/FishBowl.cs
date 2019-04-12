@@ -10,6 +10,7 @@ using UnityEngine.Events;
 [RequireComponent(typeof(BoidBrain))]
 public class FishBowl : MonoBehaviour
 {
+    public GameObject BoidPrefab = null;
     public int Count = 10;
 
     private BoidBrain brain = null;
@@ -26,7 +27,10 @@ public class FishBowl : MonoBehaviour
 
     void Start()
     {
-        BoidGenerator generator = new BoidGenerator();
-        generator.CreateBoids(brain.transform, brain.Settings, Count);
+        if (BoidPrefab)
+        {
+            BoidGenerator generator = new BoidGenerator();
+            generator.CreateBoids(brain.transform, brain.Settings, BoidPrefab, Count);
+        }
     }
 }
