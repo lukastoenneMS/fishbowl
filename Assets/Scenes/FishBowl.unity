@@ -322,7 +322,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BoidPrefab: {fileID: 3713867872635992076, guid: 7c155ca52740c3040a4e060c3a6fade3,
     type: 3}
-  Count: 10
+  Count: 50
 --- !u!1 &984957130
 GameObject:
   m_ObjectHideFlags: 0

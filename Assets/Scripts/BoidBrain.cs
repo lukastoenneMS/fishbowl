@@ -35,32 +35,14 @@ namespace Boids
 
         public BoidBrain()
         {
-            settings.rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
+            // settings.rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
+            settings.rules.Add(new SwarmRule() {searchRadius = 0.5f});
         }
 
         private BoidTarget ApplyRuleFuzzy(BoidRule rule, BoidParticle boid, BoidState state)
         {
             BoidTarget target = rule.Evaluate(boid, state);
             return target;
-        }
-
-        public void Apply(BoidSettings settings)
-        {
-            int numBoids = boids.Count;
-
-            foreach (BoidParticle boid in boids)
-            {
-                BoidState state = boid.GetState();
-                foreach (BoidRule rule in settings.rules)
-                {
-                    BoidTarget target = ApplyRuleFuzzy(rule, boid, state);
-                    if (target != null)
-                    {
-                        boid.ApplyTarget(target, settings);
-                        break;
-                    }
-                }
-            }
         }
 
         public void Awake()
@@ -75,7 +57,36 @@ namespace Boids
 
         void FixedUpdate()
         {
-            Apply(settings);
+            ApplyRules();
+        }
+
+        private void ApplyRules()
+        {
+            int numBoids = boids.Count;
+
+            foreach (BoidRule rule in settings.rules)
+            {
+                rule.Prepare(boids);
+            }
+
+            foreach (BoidParticle boid in boids)
+            {
+                BoidState state = boid.GetState();
+                foreach (BoidRule rule in settings.rules)
+                {
+                    BoidTarget target = ApplyRuleFuzzy(rule, boid, state);
+                    if (target != null)
+                    {
+                        boid.ApplyTarget(target, settings);
+                        break;
+                    }
+                }
+            }
+
+            foreach (BoidRule rule in settings.rules)
+            {
+                rule.Cleanup();
+            }
         }
     }
 }
