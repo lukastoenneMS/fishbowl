@@ -46,10 +46,13 @@ namespace Boids
                 go.transform.rotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), sampleUnitSphereSurface(rng));
                 go.transform.localScale.Set(1.0f, 1.0f, 1.0f);
 
-                Rigidbody rb = go.AddComponent<Rigidbody>();
-                rb.useGravity = false;
-                rb.drag = 0.4f;
-                rb.angularDrag = 1.5f;
+                Rigidbody rb = go.GetComponent<Rigidbody>();
+                if (rb)
+                {
+                    rb.useGravity = false;
+                    rb.drag = 0.4f;
+                    rb.angularDrag = 1.5f;
+                }
 
                 BoidParticle bo = go.AddComponent<BoidParticle>();
             }
