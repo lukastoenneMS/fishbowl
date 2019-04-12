@@ -266,6 +266,7 @@ GameObject:
   m_Component:
   - component: {fileID: 669593040}
   - component: {fileID: 669593041}
+  - component: {fileID: 669593042}
   m_Layer: 0
   m_Name: FishBowl
   m_TagString: Untagged
@@ -296,10 +297,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 669593039}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00ab32d150f287d40b714a50e96e4f81, type: 3}
+  m_Script: {fileID: 11500000, guid: 43275dcf45f0fd346866314b109d3862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Count: 10
   settings:
     MinSpeed: 0
     MaxSpeed: 10
@@ -308,6 +308,19 @@ MonoBehaviour:
     PersonalSpace: 1
     Banking: 1
     Pitch: 1
+--- !u!114 &669593042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669593039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00ab32d150f287d40b714a50e96e4f81, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Count: 10
 --- !u!1 &984957130
 GameObject:
   m_ObjectHideFlags: 0

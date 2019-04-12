@@ -16,7 +16,7 @@ public class FishBowl : MonoBehaviour
 
     void Awake()
     {
-        var brain = GetComponent<BoidBrain>();
+        brain = GetComponent<BoidBrain>();
         if (!brain)
         {
             Debug.LogWarning("No boid brain component found");
