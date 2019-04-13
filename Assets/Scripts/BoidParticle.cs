@@ -87,46 +87,10 @@ namespace Boids
                 rb.AddForce(targetForce * rb.mass);
             }
 
-            UpdateDebugTarget(state, target, targetAccel / settings.MaxAcceleration);
+            BoidParticleDebug.UpdateDebugTarget(this, state, target, targetAccel / settings.MaxAcceleration);
         }
 
-        private void UpdateDebugTarget(BoidState state, BoidTarget target, float force)
-        {
-            if (GetOrCreateDebugObject("Target", PrimitiveType.Cube, out Transform debugTarget) &&
-                GetOrCreateDebugObject("TargetDirection", PrimitiveType.Cube, out Transform debugTargetDirection))
-            {
-                if (target.position.HasValue)
-                {
-                    Vector3 avg = 0.5f * (target.position.Value + state.position);
-                    Vector3 delta = target.position.Value - state.position;
-
-                    debugTarget.gameObject.SetActive(true);
-                    debugTargetDirection.gameObject.SetActive(true);
-                    debugTarget.position = target.position.Value;
-                    debugTargetDirection.position = avg;
-                    debugTargetDirection.rotation = Quaternion.FromToRotation(Vector3.forward, delta);
-                    debugTargetDirection.localScale = new Vector3(0.01f, 0.01f, delta.magnitude);
-
-                    Color color = Color.white * (1.0f - force) + Color.green * force;
-                    debugTarget.GetComponent<Renderer>().material.color = color;
-                    debugTargetDirection.GetComponent<Renderer>().material.color = color;
-                }
-                else
-                {
-                    debugTarget.gameObject.SetActive(false);
-                    debugTargetDirection.gameObject.SetActive(false);
-                }
-            }
-            else
-            {
-                if (debugObjects)
-                {
-                    Destroy(debugObjects);
-                }
-            }
-        }
-
-        private bool GetOrCreateDebugObject(string name, PrimitiveType prim, out Transform dbg)
+        public Transform GetDebugObjects()
         {
             if (EnableDebugObjects)
             {
@@ -144,21 +108,7 @@ namespace Boids
                 }
             }
 
-            if (debugObjects)
-            {
-                dbg = debugObjects.transform.Find(name);
-                if (!dbg)
-                {
-                    dbg = GameObject.CreatePrimitive(prim).transform;
-                    dbg.name = name;
-                    dbg.parent = debugObjects.transform;
-                    dbg.localScale = new Vector3(0.02f, 0.02f, 0.02f);
-                }
-                return true;
-            }
-
-            dbg = null;
-            return false;
+            return debugObjects.transform;
         }
     }
 }
