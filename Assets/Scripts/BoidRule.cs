@@ -95,7 +95,12 @@ namespace Boids
         /// <summary>
         /// Maximum distance of other boids to influence the swarm searching behavior.
         /// </summary>
-        public float searchRadius = 1.0f;
+        public float maxRadius = 1.0f;
+
+        /// <summary>
+        /// Minimum distance to activate swarm behavior.
+        /// </summary>
+        public float minRadius = 0.1f;
 
         /// <summary>
         /// Weight preference of boids in the front vs. boids in the back
@@ -133,8 +138,14 @@ namespace Boids
 
         public override BoidTarget Evaluate(BoidParticle boid, BoidState state)
         {
+            float deltaRadius = maxRadius - minRadius;
+            if (deltaRadius <= 0.0f)
+            {
+                return null;
+            }
+
             queryResults.Clear();
-            query.Radius(tree, state.position, searchRadius, queryResults);
+            query.Radius(tree, state.position, maxRadius, queryResults);
 
             float totweight = 0.0f;
             Vector3 goal = Vector3.zero;
@@ -143,11 +154,17 @@ namespace Boids
                 Vector3 p = tree.Points[idx];
                 Vector3 d = p - state.position;
                 float dist = d.magnitude;
-                float fwd = Vector3.Dot(d, state.direction);
 
-                float weight = 1.0f - dist / searchRadius;
+                // Ignore results inside the min. radius
+                if (dist < minRadius)
+                {
+                    continue;
+                }
+
+                float weight = 1.0f - (dist - minRadius) / deltaRadius;
                 if (forwardAsymmetry > 0.0f)
                 {
+                    float fwd = Vector3.Dot(d, state.direction);
                     float fwdFactor = 0.5f + 0.5f * fwd;
                     weight *= 1.0f - (1.0f - fwdFactor) * forwardAsymmetry;
                 }
@@ -158,9 +175,12 @@ namespace Boids
             if (totweight > 0.0f)
             {
                 goal /= totweight;
+                return new BoidTarget(goal);
             }
-
-            return new BoidTarget(goal);
+            else
+            {
+                return null;
+            }
         }
     }
 }
