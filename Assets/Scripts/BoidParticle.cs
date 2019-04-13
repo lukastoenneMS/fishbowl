@@ -93,11 +93,6 @@ namespace Boids
                 rb.AddForce(targetForce, ForceMode.Acceleration);
                 rb.AddTorque(targetTorque, ForceMode.VelocityChange);
             }
-
-            if (GetDebug(out BoidParticleDebug dbg))
-            {
-                dbg.SetTarget(target, targetAccel / settings.MaxAcceleration);
-            }
         }
 
         public bool GetDebug(out BoidParticleDebug dbg)

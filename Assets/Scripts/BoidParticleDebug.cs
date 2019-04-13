@@ -20,20 +20,21 @@ namespace Boids
             this.debugObjects = debugObjects;
         }
 
-        public void SetTarget(BoidTarget target, float force)
+        public void SetTarget(BoidTarget target)
         {
             var state = particle.GetState();
             var debugTarget = GetOrCreate("Target", PrimitiveType.Cube);
             var debugTargetDirection = GetOrCreate("TargetDirection", PrimitiveType.Cube);
 
-            if (target.position.HasValue)
+            if (target != null && target.position.HasValue)
             {
                 debugTarget.gameObject.SetActive(true);
                 debugTargetDirection.gameObject.SetActive(true);
                 debugTarget.position = target.position.Value;
                 SetTransformVector(debugTargetDirection, state.position, target.position.Value, 0.01f);
 
-                Color color = Color.white * (1.0f - force) + Color.green * force;
+                // Color color = Color.white * (1.0f - force) + Color.green * force;
+                Color color = Color.green;
                 debugTarget.GetComponent<Renderer>().material.color = color;
                 debugTargetDirection.GetComponent<Renderer>().material.color = color;
             }

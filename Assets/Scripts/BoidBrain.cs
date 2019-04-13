@@ -50,15 +50,23 @@ namespace Boids
 
             foreach (BoidParticle boid in boids)
             {
+                boid.GetDebug(out BoidParticleDebug dbg);
+
                 BoidState state = boid.GetState();
+                BoidTarget target = null;
                 foreach (BoidRule rule in rules)
                 {
-                    BoidTarget target = ApplyRuleFuzzy(rule, boid, state);
+                    target = ApplyRuleFuzzy(rule, boid, state);
                     if (target != null)
                     {
                         boid.ApplyTarget(target);
                         break;
                     }
+                }
+
+                if (dbg != null)
+                {
+                    dbg.SetTarget(target);
                 }
             }
 
