@@ -20,8 +20,8 @@ namespace Boids
 
         public BoidBrain()
         {
-            // rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
-            rules.Add(new SwarmRule() {searchRadius = 1.5f});
+            rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
+            // rules.Add(new SwarmRule() {minRadius = 0.8f, maxRadius = 3.0f});
         }
 
         public void Awake()

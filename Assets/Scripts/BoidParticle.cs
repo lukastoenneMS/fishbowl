@@ -41,15 +41,6 @@ namespace Boids
 
         private GameObject debugObjects = null;
 
-        void Awake()
-        {
-            if (EnableDebugObjects)
-            {
-                debugObjects = new GameObject("Debugging");
-                debugObjects.transform.parent = transform;
-            }
-        }
-
         void OnDestroy()
         {
             if (debugObjects)
@@ -96,16 +87,14 @@ namespace Boids
                 rb.AddForce(targetForce * rb.mass);
             }
 
-            UpdateDebugObjects(state, target);
+            UpdateDebugTarget(state, target, targetAccel / settings.MaxAcceleration);
         }
 
-        private void UpdateDebugObjects(BoidState state, BoidTarget target)
+        private void UpdateDebugTarget(BoidState state, BoidTarget target, float force)
         {
-            if (debugObjects)
+            if (GetOrCreateDebugObject("Target", PrimitiveType.Cube, out Transform debugTarget) &&
+                GetOrCreateDebugObject("TargetDirection", PrimitiveType.Cube, out Transform debugTargetDirection))
             {
-                var debugTarget = GetOrCreateDebugObject("Target", PrimitiveType.Cube);
-                var debugTargetDirection = GetOrCreateDebugObject("TargetDirection", PrimitiveType.Cube);
-
                 if (target.position.HasValue)
                 {
                     Vector3 avg = 0.5f * (target.position.Value + state.position);
@@ -117,6 +106,10 @@ namespace Boids
                     debugTargetDirection.position = avg;
                     debugTargetDirection.rotation = Quaternion.FromToRotation(Vector3.forward, delta);
                     debugTargetDirection.localScale = new Vector3(0.01f, 0.01f, delta.magnitude);
+
+                    Color color = Color.white * (1.0f - force) + Color.green * force;
+                    debugTarget.GetComponent<Renderer>().material.color = color;
+                    debugTargetDirection.GetComponent<Renderer>().material.color = color;
                 }
                 else
                 {
@@ -124,23 +117,48 @@ namespace Boids
                     debugTargetDirection.gameObject.SetActive(false);
                 }
             }
+            else
+            {
+                if (debugObjects)
+                {
+                    Destroy(debugObjects);
+                }
+            }
         }
 
-        private Transform GetOrCreateDebugObject(string name, PrimitiveType prim)
+        private bool GetOrCreateDebugObject(string name, PrimitiveType prim, out Transform dbg)
         {
+            if (EnableDebugObjects)
+            {
+                if (!debugObjects)
+                {
+                    debugObjects = new GameObject("Debugging");
+                    debugObjects.transform.parent = transform;
+                }
+            }
+            else
+            {
+                if (debugObjects)
+                {
+                    Destroy(debugObjects);
+                }
+            }
+
             if (debugObjects)
             {
-                var ob = debugObjects.transform.Find(name);
-                if (!ob)
+                dbg = debugObjects.transform.Find(name);
+                if (!dbg)
                 {
-                    ob = GameObject.CreatePrimitive(prim).transform;
-                    ob.name = name;
-                    ob.parent = debugObjects.transform;
-                    ob.localScale = new Vector3(0.02f, 0.02f, 0.02f);
+                    dbg = GameObject.CreatePrimitive(prim).transform;
+                    dbg.name = name;
+                    dbg.parent = debugObjects.transform;
+                    dbg.localScale = new Vector3(0.02f, 0.02f, 0.02f);
                 }
-                return ob;
+                return true;
             }
-            return null;
+
+            dbg = null;
+            return false;
         }
     }
 }

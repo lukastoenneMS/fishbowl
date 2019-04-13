@@ -300,14 +300,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43275dcf45f0fd346866314b109d3862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settings:
-    MinSpeed: 0
-    MaxSpeed: 10
-    MaxAcceleration: 0.5
-    MaxAngularVelocity: 0.5
-    PersonalSpace: 1
-    Banking: 1
-    Pitch: 1
 --- !u!114 &669593042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,7 +314,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BoidPrefab: {fileID: 3713867872635992076, guid: 7c155ca52740c3040a4e060c3a6fade3,
     type: 3}
-  Count: 50
+  Count: 5
 --- !u!1 &984957130
 GameObject:
   m_ObjectHideFlags: 0
