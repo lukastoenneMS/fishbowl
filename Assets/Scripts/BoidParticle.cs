@@ -76,10 +76,11 @@ namespace Boids
             Vector3 targetDirection = targetDelta.normalized;
             // Debug.DrawLine(state.position, state.position + targetDirection, Color.white);
 
-            float targetSpeed = Math.Min(targetDelta.magnitude / dtime, settings.MaxSpeed);
-            float targetAccel = Math.Min(targetDelta.magnitude / (dtime*dtime), settings.MaxAcceleration);
-            // Vector3 targetVelocity = targetDirection * targetSpeed;
-            Vector3 targetForce = targetDirection * targetAccel;
+            float projectedDelta = Vector3.Dot(targetDelta, state.direction);
+            // float targetSpeed = Mathf.Clamp(projectedDelta / dtime, 0.0f, settings.MaxSpeed);
+            float targetAccel = Mathf.Clamp(projectedDelta / (dtime*dtime), 0.0f, settings.MaxAcceleration);
+            // Vector3 targetVelocity = state.direction * targetSpeed;
+            Vector3 targetForce = state.direction * targetAccel;
 
             Quaternion deltaRotation = Quaternion.LookRotation(targetDelta) * Quaternion.Inverse(stateRotation);
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);

@@ -55,8 +55,6 @@ namespace Boids
                 if (rb)
                 {
                     rb.useGravity = false;
-                    rb.drag = 0.4f;
-                    rb.angularDrag = 1.5f;
                 }
             }
         }

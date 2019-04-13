@@ -242,8 +242,8 @@ Rigidbody:
   m_GameObject: {fileID: 3713867872635992076}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_Drag: 0.4
+  m_AngularDrag: 2
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -279,11 +279,11 @@ MonoBehaviour:
     MinSpeed: 1
     MaxSpeed: 10
     MaxAcceleration: 0.5
-    MaxAngularVelocity: 0.5
+    MaxAngularVelocity: 0.1
     PersonalSpace: 1
     Banking: 1
     Pitch: 1
-  EnableDebugObjects: 1
+  EnableDebugObjects: 0
 --- !u!1 &7795210021907508416
 GameObject:
   m_ObjectHideFlags: 0
