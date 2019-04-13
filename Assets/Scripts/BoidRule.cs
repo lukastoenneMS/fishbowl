@@ -74,7 +74,8 @@ namespace Boids
 
         public override BoidTarget Evaluate(BoidParticle boid, BoidState state)
         {
-            Vector3 goal = new Vector3(state.position.x, 0.0f, state.position.z);
+            Vector3 localPos = state.position - center;
+            Vector3 goal = new Vector3(localPos.x, 0.0f, localPos.z);
             goal = goal.normalized * radius + center;
 
             return new BoidTarget(goal);
