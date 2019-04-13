@@ -139,6 +139,12 @@ namespace Boids
 
         public override BoidTarget Evaluate(BoidParticle boid, BoidState state)
         {
+            boid.GetDebug(out var dbg);
+            if (dbg != null)
+            {
+                dbg.ClearSwarm();
+            }
+
             float deltaRadius = maxRadius - minRadius;
             if (deltaRadius <= 0.0f)
             {
@@ -168,6 +174,11 @@ namespace Boids
                     float fwd = Vector3.Dot(d, state.direction);
                     float fwdFactor = 0.5f + 0.5f * fwd;
                     weight *= 1.0f - (1.0f - fwdFactor) * forwardAsymmetry;
+                }
+
+                if (dbg != null)
+                {
+                    dbg.AddSwarmPoint(p, weight);
                 }
 
                 goal += p * weight;

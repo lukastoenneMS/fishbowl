@@ -87,10 +87,13 @@ namespace Boids
                 rb.AddForce(targetForce * rb.mass);
             }
 
-            BoidParticleDebug.UpdateDebugTarget(this, state, target, targetAccel / settings.MaxAcceleration);
+            if (GetDebug(out BoidParticleDebug dbg))
+            {
+                dbg.SetTarget(target, targetAccel / settings.MaxAcceleration);
+            }
         }
 
-        public Transform GetDebugObjects()
+        public bool GetDebug(out BoidParticleDebug dbg)
         {
             if (EnableDebugObjects)
             {
@@ -99,6 +102,9 @@ namespace Boids
                     debugObjects = new GameObject("Debugging");
                     debugObjects.transform.parent = transform;
                 }
+
+                dbg = new BoidParticleDebug(this, debugObjects.transform);
+                return true;
             }
             else
             {
@@ -106,9 +112,10 @@ namespace Boids
                 {
                     Destroy(debugObjects);
                 }
-            }
 
-            return debugObjects.transform;
+                dbg = null;
+                return false;
+            }
         }
     }
 }
