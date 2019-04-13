@@ -1,10 +1,4 @@
 * Implement upright behaviour of BoidParticle
 * Implement max. pitch
-* Fix stack overflow:
-StackOverflowException: The requested operation caused a stack overflow.
-UnityEngine.Vector3.op_Subtraction (UnityEngine.Vector3 a, UnityEngine.Vector3 b) (at C:/buildslave/unity/build/Runtime/Export/Vector3.cs:314)
-DataStructures.ViliWonka.KDTree.KDBounds.get_size () (at Assets/Datastructures/KDTree/KDBounds.cs:37)
-DataStructures.ViliWonka.KDTree.KDTree.SplitNode (DataStructures.ViliWonka.KDTree.KDNode parent) (at Assets/Datastructures/KDTree/KDTree.cs:273)
-DataStructures.ViliWonka.KDTree.KDTree.SplitNode (DataStructures.ViliWonka.KDTree.KDNode parent) (at Assets/Datastructures/KDTree/KDTree.cs:328)
-DataStructures.ViliWonka.KDTree.KDTree.SplitNode (DataStructures.ViliWonka.KDTree.KDNode parent) (at Assets/Datastructures/KDTree/KDTree.cs:328)
-...
+* Inspector for rules
+* Implement rule weight and fuzzy selection/averaging

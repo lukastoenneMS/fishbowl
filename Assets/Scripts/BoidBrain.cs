@@ -24,12 +24,6 @@ namespace Boids
             rules.Add(new SwarmRule() {searchRadius = 0.5f});
         }
 
-        private BoidTarget ApplyRuleFuzzy(BoidRule rule, BoidParticle boid, BoidState state)
-        {
-            BoidTarget target = rule.Evaluate(boid, state);
-            return target;
-        }
-
         public void Awake()
         {
             GetComponentsInChildren<BoidParticle>(boids);
@@ -72,6 +66,12 @@ namespace Boids
             {
                 rule.Cleanup();
             }
+        }
+
+        private BoidTarget ApplyRuleFuzzy(BoidRule rule, BoidParticle boid, BoidState state)
+        {
+            BoidTarget target = rule.Evaluate(boid, state);
+            return target;
         }
     }
 }
