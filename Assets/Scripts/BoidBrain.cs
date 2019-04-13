@@ -20,8 +20,6 @@ namespace Boids
 
         public float Banking = 1.0f;
         public float Pitch = 1.0f;
-
-        public List<BoidRule> rules = new List<BoidRule>();
     }
 
     [System.Serializable]
@@ -31,12 +29,16 @@ namespace Boids
         private BoidSettings settings = new BoidSettings();
         public BoidSettings Settings => settings;
 
+        [SerializeField]
+        private List<BoidRule> rules = new List<BoidRule>();
+        public List<BoidRule> Rules => rules;
+
         private readonly List<BoidParticle> boids = new List<BoidParticle>();
 
         public BoidBrain()
         {
-            // settings.rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
-            settings.rules.Add(new SwarmRule() {searchRadius = 0.5f});
+            // rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
+            rules.Add(new SwarmRule() {searchRadius = 0.5f});
         }
 
         private BoidTarget ApplyRuleFuzzy(BoidRule rule, BoidParticle boid, BoidState state)
@@ -64,7 +66,7 @@ namespace Boids
         {
             int numBoids = boids.Count;
 
-            foreach (BoidRule rule in settings.rules)
+            foreach (BoidRule rule in rules)
             {
                 rule.Prepare(boids);
             }
@@ -72,7 +74,7 @@ namespace Boids
             foreach (BoidParticle boid in boids)
             {
                 BoidState state = boid.GetState();
-                foreach (BoidRule rule in settings.rules)
+                foreach (BoidRule rule in rules)
                 {
                     BoidTarget target = ApplyRuleFuzzy(rule, boid, state);
                     if (target != null)
@@ -83,7 +85,7 @@ namespace Boids
                 }
             }
 
-            foreach (BoidRule rule in settings.rules)
+            foreach (BoidRule rule in rules)
             {
                 rule.Cleanup();
             }
