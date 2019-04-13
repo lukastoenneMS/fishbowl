@@ -289,14 +289,27 @@ namespace DataStructures.ViliWonka.KDTree {
             float boundsStart = parentBounds.min[splitAxis];
             float boundsEnd   = parentBounds.max[splitAxis];
 
-            // Calculate the spliting coords
-            float splitPivot = CalculatePivot(parent.start, parent.end, boundsStart, boundsEnd, splitAxis);
+            float splitPivot;
+            int splittingIndex;
+            if (boundsStart != boundsEnd)
+            {
+                // Calculate the spliting coords
+                splitPivot = CalculatePivot(parent.start, parent.end, boundsStart, boundsEnd, splitAxis);
+
+                // 'Spliting' array to two subarrays
+                splittingIndex = Partition(parent.start, parent.end, splitPivot, splitAxis);
+            }
+            else
+            {
+                // Special case for zero-size bounds
+                splitPivot = boundsStart;
+
+                // 'Spliting' array to two subarrays
+                splittingIndex = (parent.start + parent.end) >> 1;
+            }
 
             parent.partitionAxis = splitAxis;
             parent.partitionCoordinate = splitPivot;
-
-            // 'Spliting' array to two subarrays
-            int splittingIndex = Partition(parent.start, parent.end, splitPivot, splitAxis);
 
             // Negative / Left node
             Vector3 negMax = parentBounds.max;
