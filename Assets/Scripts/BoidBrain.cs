@@ -10,25 +10,8 @@ using UnityEngine.Assertions;
 namespace Boids
 {
     [System.Serializable]
-    public class BoidSettings
-    {
-        public float MinSpeed = 0.0f;
-        public float MaxSpeed = 10.0f;
-        public float MaxAcceleration = 0.5f;
-        public float MaxAngularVelocity = 0.5f;
-        public float PersonalSpace = 1.0f;
-
-        public float Banking = 1.0f;
-        public float Pitch = 1.0f;
-    }
-
-    [System.Serializable]
     public class BoidBrain : MonoBehaviour
     {
-        [SerializeField]
-        private BoidSettings settings = new BoidSettings();
-        public BoidSettings Settings => settings;
-
         [SerializeField]
         private List<BoidRule> rules = new List<BoidRule>();
         public List<BoidRule> Rules => rules;
@@ -79,7 +62,7 @@ namespace Boids
                     BoidTarget target = ApplyRuleFuzzy(rule, boid, state);
                     if (target != null)
                     {
-                        boid.ApplyTarget(target, settings);
+                        boid.ApplyTarget(target);
                         break;
                     }
                 }

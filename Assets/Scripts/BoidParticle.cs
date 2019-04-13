@@ -9,6 +9,19 @@ using UnityEngine.Assertions;
 
 namespace Boids
 {
+    [System.Serializable]
+    public class BoidSettings
+    {
+        public float MinSpeed = 0.0f;
+        public float MaxSpeed = 10.0f;
+        public float MaxAcceleration = 0.5f;
+        public float MaxAngularVelocity = 0.5f;
+        public float PersonalSpace = 1.0f;
+
+        public float Banking = 1.0f;
+        public float Pitch = 1.0f;
+    }
+
     public class BoidState
     {
         public Vector3 position;
@@ -20,6 +33,10 @@ namespace Boids
     [System.Serializable]
     public class BoidParticle : MonoBehaviour
     {
+        [SerializeField]
+        private BoidSettings settings = new BoidSettings();
+        public BoidSettings Settings => settings;
+
         public BoidState GetState()
         {
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
@@ -35,7 +52,7 @@ namespace Boids
             return state;
         }
 
-        public void ApplyTarget(BoidTarget target, BoidSettings settings)
+        public void ApplyTarget(BoidTarget target)
         {
             float dtime = Time.fixedDeltaTime;
             BoidState state = GetState();

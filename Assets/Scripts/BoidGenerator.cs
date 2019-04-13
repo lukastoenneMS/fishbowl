@@ -34,7 +34,7 @@ namespace Boids
             return new Vector3((float)x, (float)y, (float)z);
         }
 
-        public void CreateBoids(Transform parent, BoidSettings settings, GameObject prefab, int count)
+        public void CreateBoids(Transform parent, GameObject prefab, int count)
         {
             if (!prefab.GetComponent<BoidParticle>())
             {

@@ -30,7 +30,7 @@ public class FishBowl : MonoBehaviour
         if (BoidPrefab)
         {
             BoidGenerator generator = new BoidGenerator();
-            generator.CreateBoids(brain.transform, brain.Settings, BoidPrefab, Count);
+            generator.CreateBoids(brain.transform, BoidPrefab, Count);
         }
     }
 }
