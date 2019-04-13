@@ -283,6 +283,7 @@ MonoBehaviour:
     PersonalSpace: 1
     Banking: 1
     Pitch: 1
+  EnableDebugObjects: 1
 --- !u!1 &7795210021907508416
 GameObject:
   m_ObjectHideFlags: 0
