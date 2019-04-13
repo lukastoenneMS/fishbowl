@@ -68,6 +68,7 @@ namespace Boids
         {
             float dtime = Time.fixedDeltaTime;
             BoidState state = GetState();
+            Quaternion stateRotation = Quaternion.LookRotation(state.direction) * Quaternion.AngleAxis(state.roll, Vector3.forward);
 
             Vector3 predictedPosition = state.position + dtime * state.velocity;
             // Debug.DrawLine(state.position, predictedPosition, Color.grey);
@@ -80,11 +81,17 @@ namespace Boids
             // Vector3 targetVelocity = targetDirection * targetSpeed;
             Vector3 targetForce = targetDirection * targetAccel;
 
+            Quaternion deltaRotation = Quaternion.LookRotation(targetDelta) * Quaternion.Inverse(stateRotation);
+            deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
+            float targetAngVelChange = Math.Min(Mathf.Deg2Rad * deltaAngle / (dtime*dtime), settings.MaxAngularVelocity);
+            Vector3 targetTorque = deltaAxis * targetAngVelChange;
+
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             if (rb)
             {
                 // rb.velocity = targetVelocity;
-                rb.AddForce(targetForce * rb.mass);
+                rb.AddForce(targetForce, ForceMode.Acceleration);
+                rb.AddTorque(targetTorque, ForceMode.VelocityChange);
             }
 
             if (GetDebug(out BoidParticleDebug dbg))
