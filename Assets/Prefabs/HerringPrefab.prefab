@@ -207,6 +207,7 @@ GameObject:
   - component: {fileID: 2771724287153350456}
   - component: {fileID: 7896233899698452159}
   - component: {fileID: 2199321727686052435}
+  - component: {fileID: 3905843044318009765}
   m_Layer: 0
   m_Name: HerringPrefab
   m_TagString: Untagged
@@ -262,6 +263,18 @@ CapsuleCollider:
   m_Height: 0.3
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3905843044318009765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3713867872635992076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6f0d1b467d066a4eab08f7454fad517, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7795210021907508416
 GameObject:
   m_ObjectHideFlags: 0

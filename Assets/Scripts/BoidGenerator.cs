@@ -36,6 +36,11 @@ namespace Boids
 
         public void CreateBoids(Transform parent, BoidSettings settings, GameObject prefab, int count)
         {
+            if (!prefab.GetComponent<BoidParticle>())
+            {
+                Debug.LogWarning("No BoidParticle component found in the boid prefab");
+            }
+
             System.Random rng = new System.Random(63948);
 
             for (int i = 0; i < count; ++i)
@@ -53,8 +58,6 @@ namespace Boids
                     rb.drag = 0.4f;
                     rb.angularDrag = 1.5f;
                 }
-
-                BoidParticle bo = go.AddComponent<BoidParticle>();
             }
         }
     }
