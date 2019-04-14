@@ -146,7 +146,6 @@ namespace Boids
                 if (!debugObjects)
                 {
                     debugObjects = new GameObject("Debugging");
-                    debugObjects.transform.parent = transform;
                 }
 
                 dbg = new BoidParticleDebug(this, debugObjects.transform);
