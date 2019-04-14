@@ -85,15 +85,18 @@ namespace Boids
                 Vector3 dv = GetTargetVelocityChange(state, target);
 
                 // Adjust velocity change to not exceed max. velocity
-                // Solves equation: ||v + lambda * dv|| = maxVelocity
-                // lambda clamped to [0, 1] to not accelerate backwards and not add more than desired velocity
-                float v_v = Vector3.Dot(v, v);
-                float dv_dv = Vector3.Dot(dv, dv);
-                float v_dv = Vector3.Dot(v, dv);
-                if (dv_dv > 0.0f)
+                if ((v + dv).sqrMagnitude > settings.MaxSpeed * settings.MaxSpeed)
                 {
-                    float lambda = (settings.MaxSpeed * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
-                    dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
+                    // Solves equation: ||v + lambda * dv|| = maxVelocity
+                    // lambda clamped to [0, 1] to not accelerate backwards and not add more than desired velocity
+                    float v_v = Vector3.Dot(v, v);
+                    float dv_dv = Vector3.Dot(dv, dv);
+                    float v_dv = Vector3.Dot(v, dv);
+                    if (dv_dv > 0.0f)
+                    {
+                        float lambda = (settings.MaxSpeed * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
+                        dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
+                    }
                 }
 
                 targetForce = dv;
