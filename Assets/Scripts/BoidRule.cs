@@ -57,16 +57,31 @@ namespace Boids
         }
     }
 
-    public abstract class BoidRule
+    public class BoidRule : ScriptableObject
     {
-        public abstract BoidTarget Evaluate(BoidParticle boid, BoidState state);
+        public virtual void OnAwake()
+        {
+        }
 
-        public abstract void Prepare(List<BoidParticle> boids);
+        public virtual void OnDestroy()
+        {
+        }
 
-        public abstract void Cleanup();
+        public virtual BoidTarget Evaluate(BoidParticle boid, BoidState state)
+        {
+            return null;
+        }
+
+        public virtual void Prepare(List<BoidParticle> boids)
+        {
+        }
+
+        public virtual void Cleanup()
+        {
+        }
     }
 
-    [System.Serializable]
+    [CreateAssetMenu(fileName = "SimpleCircleRule", menuName = "Boids/SimpleCircleRule", order = 1)]
     public class SimpleCircleRule : BoidRule
     {
         public float radius = 1.0f;
@@ -80,17 +95,9 @@ namespace Boids
 
             return new BoidTarget(goal);
         }
-
-        public override void Prepare(List<BoidParticle> boids)
-        {
-        }
-
-        public override void Cleanup()
-        {
-        }
     }
 
-    [System.Serializable]
+    [CreateAssetMenu(fileName = "SwarmRule", menuName = "Boids/SwarmRule", order = 1)]
     public class SwarmRule : BoidRule
     {
         /// <summary>
@@ -113,12 +120,19 @@ namespace Boids
         private KDQuery query;
         private List<int> queryResults;
 
-        public SwarmRule()
+        public override void OnAwake()
         {
             int maxPointsPerLeafNode = 32;
             tree = new KDTree(maxPointsPerLeafNode);
             query = new KDQuery();
             queryResults = new List<int>();
+        }
+
+        public override void OnDestroy()
+        {
+            tree = null;
+            query = null;
+            queryResults = null;
         }
 
         public override void Prepare(List<BoidParticle> boids)

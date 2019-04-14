@@ -18,15 +18,22 @@ namespace Boids
 
         private readonly List<BoidParticle> boids = new List<BoidParticle>();
 
-        public BoidBrain()
-        {
-            // rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
-            // rules.Add(new SwarmRule() {minRadius = 1.5f, maxRadius = 3.0f});
-        }
-
         public void Awake()
         {
             GetComponentsInChildren<BoidParticle>(boids);
+
+            foreach (BoidRule rule in rules)
+            {
+                rule.OnAwake();
+            }
+        }
+
+        public void OnDestroy()
+        {
+            foreach (BoidRule rule in rules)
+            {
+                rule.OnDestroy();
+            }
         }
 
         public void OnTransformChildrenChanged()
