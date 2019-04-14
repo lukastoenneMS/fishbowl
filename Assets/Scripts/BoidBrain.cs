@@ -21,7 +21,7 @@ namespace Boids
         public BoidBrain()
         {
             // rules.Add(new SimpleCircleRule() {radius = 3.0f, center = new Vector3(0, 0, -4)});
-            rules.Add(new SwarmRule() {minRadius = 1.5f, maxRadius = 3.0f});
+            // rules.Add(new SwarmRule() {minRadius = 1.5f, maxRadius = 3.0f});
         }
 
         public void Awake()

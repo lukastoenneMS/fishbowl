@@ -58,8 +58,7 @@ namespace Boids
             state.position = rb.position;
             state.velocity = rb.velocity;
             state.direction = rb.transform.forward;
-            Vector3 plane = Vector3.Cross(rb.transform.forward, Vector3.up).normalized;
-            state.roll = (float)Math.Acos((double)Vector3.Cross(rb.transform.up, plane).magnitude);
+            state.roll = (rb.rotation.eulerAngles.z + 180.0f) % 360.0f - 180.0f;
 
             return state;
         }
@@ -68,15 +67,20 @@ namespace Boids
         {
             float dtime = Time.fixedDeltaTime;
             BoidState state = GetState();
-            Quaternion stateRotation = Quaternion.LookRotation(state.direction) * Quaternion.AngleAxis(state.roll, Vector3.forward);
+            Quaternion uprightRotation = Quaternion.LookRotation(state.direction, Vector3.up);
+            Quaternion stateRotation = uprightRotation * Quaternion.Euler(0.0f, 0.0f, state.roll);
+            Quaternion test = Quaternion.Euler(0.0f, 0.0f, state.roll);
+
+            GetDebug(out BoidParticleDebug dbg);
 
             Vector3 predictedPosition = state.position + dtime * state.velocity;
-            Vector3 targetDelta = target.position.Value - predictedPosition;
-            Vector3 targetDirection = targetDelta.normalized;
 
             Vector3 targetForce = Vector3.zero;
+            Quaternion targetRotation = uprightRotation;
             if (target != null)
             {
+                Vector3 targetDelta = target.position.Value - predictedPosition;
+                Vector3 targetDirection = targetDelta.normalized;
                 Vector3 v = state.velocity;
                 Vector3 dv = GetTargetVelocityChange(state, target);
 
@@ -86,10 +90,14 @@ namespace Boids
                 float v_v = Vector3.Dot(v, v);
                 float dv_dv = Vector3.Dot(dv, dv);
                 float v_dv = Vector3.Dot(v, dv);
-                float lambda = (settings.MaxSpeed * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
-                dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
+                if (dv_dv > 0.0f)
+                {
+                    float lambda = (settings.MaxSpeed * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
+                    dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
+                }
 
                 targetForce = dv;
+                targetRotation = Quaternion.LookRotation(targetDelta, Vector3.up);
             }
 
             // float targetSpeed = Mathf.Clamp(projectedDelta / dtime, 0.0f, settings.MaxSpeed);
@@ -97,8 +105,13 @@ namespace Boids
             // Vector3 targetVelocity = state.direction * targetSpeed;
             // Vector3 targetForce = state.direction * targetAccel;
 
-            Quaternion deltaRotation = Quaternion.LookRotation(targetDelta) * Quaternion.Inverse(stateRotation);
+            Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
+            deltaAngle = (deltaAngle + 180.0f) % 360.0f - 180.0f;
+            if (dbg != null)
+            {
+                dbg.SetPhysics(deltaAngle);
+            }
             float targetAngVelChange = Math.Min(Mathf.Deg2Rad * deltaAngle / dtime, settings.MaxAngularVelocity);
             Vector3 targetTorque = deltaAxis * targetAngVelChange;
 

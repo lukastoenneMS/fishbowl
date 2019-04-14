@@ -45,6 +45,20 @@ namespace Boids
             }
         }
 
+        public void SetPhysics(float deltaRoll)
+        {
+            var state = particle.GetState();
+
+            {
+                var dbgRoll = GetOrCreate("Roll", PrimitiveType.Cube);
+                // float mix = state.roll / 360.0f;
+                float mix = deltaRoll / 360.0f;
+                SetTransformDirection(dbgRoll, state.position, Vector3.up * mix, 0.01f);
+                Color color = Color.red * (1.0f - mix) + Color.yellow * mix;
+                dbgRoll.GetComponent<Renderer>().material.color = color;
+            }
+        }
+
         public void AddSwarmPoint(Vector3 point, float weight)
         {
             var state = particle.GetState();
