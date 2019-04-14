@@ -37,6 +37,8 @@ namespace Boids
         private BoidSettings settings = new BoidSettings();
         public BoidSettings Settings => settings;
 
+        public int CurrentRuleIndex = -1;
+
         public bool EnableDebugObjects = false;
 
         private GameObject debugObjects = null;

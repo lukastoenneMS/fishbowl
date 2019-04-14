@@ -86,8 +86,13 @@ namespace Boids
 
         private BoidTarget ApplyRuleFuzzy(BoidRule rule, BoidParticle boid, BoidState state)
         {
-            BoidTarget target = rule.Evaluate(boid, state);
-            return target;
+            if (rule.Evaluate(boid, state, out BoidTarget target, out float importance))
+            {
+
+                return target;
+            }
+
+            return null;
         }
     }
 }

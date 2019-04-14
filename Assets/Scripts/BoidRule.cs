@@ -59,17 +59,17 @@ namespace Boids
 
     public class BoidRule : ScriptableObject
     {
+        public const float ImportanceNone = 0.0f;
+        public const float ImportanceLow = 1.0f;
+        public const float ImportanceMedium = 2.0f;
+        public const float ImportanceHigh = 3.0f;
+
         public virtual void OnAwake()
         {
         }
 
         public virtual void OnDestroy()
         {
-        }
-
-        public virtual BoidTarget Evaluate(BoidParticle boid, BoidState state)
-        {
-            return null;
         }
 
         public virtual void Prepare(List<BoidParticle> boids)
@@ -79,6 +79,13 @@ namespace Boids
         public virtual void Cleanup()
         {
         }
+
+        public virtual bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float importance)
+        {
+            target = null;
+            importance = 0.0f;
+            return false;
+        }
     }
 
     [CreateAssetMenu(fileName = "SimpleCircleRule", menuName = "Boids/SimpleCircleRule", order = 1)]
@@ -87,13 +94,15 @@ namespace Boids
         public float radius = 1.0f;
         public Vector3 center = Vector3.zero;
 
-        public override BoidTarget Evaluate(BoidParticle boid, BoidState state)
+        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float importance)
         {
             Vector3 localPos = state.position - center;
             Vector3 goal = new Vector3(localPos.x, 0.0f, localPos.z);
             goal = goal.normalized * radius + center;
 
-            return new BoidTarget(goal);
+            target = new BoidTarget(goal);
+            importance = ImportanceLow;
+            return true;
         }
     }
 
@@ -151,7 +160,7 @@ namespace Boids
             queryResults.Clear();
         }
 
-        public override BoidTarget Evaluate(BoidParticle boid, BoidState state)
+        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float importance)
         {
             boid.GetDebug(out var dbg);
             if (dbg != null)
@@ -162,7 +171,9 @@ namespace Boids
             float deltaRadius = maxRadius - minRadius;
             if (deltaRadius <= 0.0f)
             {
-                return null;
+                target = null;
+                importance = ImportanceNone;
+                return false;
             }
 
             queryResults.Clear();
@@ -201,11 +212,15 @@ namespace Boids
             if (totweight > 0.0f)
             {
                 goal /= totweight;
-                return new BoidTarget(goal);
+                target = new BoidTarget(goal);
+                importance = ImportanceMedium;
+                return true;
             }
             else
             {
-                return null;
+                target = null;
+                importance = ImportanceNone;
+                return false;
             }
         }
     }
