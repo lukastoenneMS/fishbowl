@@ -197,7 +197,7 @@ namespace Boids
                 float weight = 1.0f - (dist - minRadius) / deltaRadius;
                 if (forwardAsymmetry > 0.0f)
                 {
-                    float fwd = Vector3.Dot(d, state.direction);
+                    float fwd = Vector3.Dot(d.normalized, state.direction);
                     float fwdFactor = 0.5f + 0.5f * fwd;
                     weight *= 1.0f - (1.0f - fwdFactor) * forwardAsymmetry;
                 }
