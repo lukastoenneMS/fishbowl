@@ -16,6 +16,9 @@ namespace Boids
         private List<BoidRule> rules = new List<BoidRule>();
         public List<BoidRule> Rules => rules;
 
+        /// Priority offset for the current rule to prevent immediate switching
+        public float CurrentRuleBias = 0.0f;
+
         private readonly List<BoidParticle> boids = new List<BoidParticle>();
 
         public void Awake()
@@ -60,21 +63,35 @@ namespace Boids
                 boid.GetDebug(out BoidParticleDebug dbg);
 
                 BoidState state = boid.GetState();
-                BoidTarget target = null;
-                foreach (BoidRule rule in rules)
+
+                BoidTarget newTarget = null;
+                int newRuleIndex = -1;
+                float maxPriority = -1.0f;
+                for (int i = 0; i < rules.Count; ++i)
                 {
-                    target = ApplyRuleFuzzy(rule, boid, state);
-                    if (target != null)
+                    BoidRule rule = rules[i];
+                    if (rule.Evaluate(boid, state, out BoidTarget target, out float priority))
                     {
-                        break;
+                        if (i == boid.CurrentRuleIndex)
+                        {
+                            // Add bias to the current rule's importance to avoid immediate switching
+                            priority += CurrentRuleBias;
+                        }
+
+                        if (priority > maxPriority)
+                        {
+                            newRuleIndex = i;
+                            maxPriority = priority;
+                            newTarget = target;
+                        }
                     }
                 }
 
-                boid.ApplyPhysics(target);
+                boid.ApplyPhysics(newTarget);
 
                 if (dbg != null)
                 {
-                    dbg.SetTarget(target);
+                    dbg.SetTarget(newTarget);
                 }
             }
 
@@ -82,17 +99,6 @@ namespace Boids
             {
                 rule.Cleanup();
             }
-        }
-
-        private BoidTarget ApplyRuleFuzzy(BoidRule rule, BoidParticle boid, BoidState state)
-        {
-            if (rule.Evaluate(boid, state, out BoidTarget target, out float importance))
-            {
-
-                return target;
-            }
-
-            return null;
         }
     }
 }

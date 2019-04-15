@@ -59,10 +59,11 @@ namespace Boids
 
     public class BoidRule : ScriptableObject
     {
-        public const float ImportanceNone = 0.0f;
-        public const float ImportanceLow = 1.0f;
-        public const float ImportanceMedium = 2.0f;
-        public const float ImportanceHigh = 3.0f;
+        public const float PriorityNone = 0.0f;
+        public const float PriorityLow = 1.0f;
+        public const float PriorityMedium = 2.0f;
+        public const float PriorityHigh = 3.0f;
+        public const float PriorityCritical = 4.0f;
 
         public virtual void OnAwake()
         {
@@ -80,10 +81,10 @@ namespace Boids
         {
         }
 
-        public virtual bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float importance)
+        public virtual bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
         {
             target = null;
-            importance = 0.0f;
+            priority = 0.0f;
             return false;
         }
     }
@@ -94,14 +95,14 @@ namespace Boids
         public float radius = 1.0f;
         public Vector3 center = Vector3.zero;
 
-        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float importance)
+        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
         {
             Vector3 localPos = state.position - center;
             Vector3 goal = new Vector3(localPos.x, 0.0f, localPos.z);
             goal = goal.normalized * radius + center;
 
             target = new BoidTarget(goal);
-            importance = ImportanceLow;
+            priority = PriorityLow;
             return true;
         }
     }
@@ -160,7 +161,7 @@ namespace Boids
             queryResults.Clear();
         }
 
-        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float importance)
+        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
         {
             boid.GetDebug(out var dbg);
             if (dbg != null)
@@ -172,7 +173,7 @@ namespace Boids
             if (deltaRadius <= 0.0f)
             {
                 target = null;
-                importance = ImportanceNone;
+                priority = PriorityNone;
                 return false;
             }
 
@@ -213,13 +214,13 @@ namespace Boids
             {
                 goal /= totweight;
                 target = new BoidTarget(goal);
-                importance = ImportanceMedium;
+                priority = PriorityMedium;
                 return true;
             }
             else
             {
                 target = null;
-                importance = ImportanceNone;
+                priority = PriorityNone;
                 return false;
             }
         }
