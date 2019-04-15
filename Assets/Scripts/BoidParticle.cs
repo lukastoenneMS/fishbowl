@@ -89,7 +89,10 @@ namespace Boids
                 targetForce = ClampedDelta(v, dv, settings.MaxSpeed);
 
                 Vector3 targetDelta = target.position.Value - predictedPosition;
-                targetRotation = Quaternion.LookRotation(targetDelta, Vector3.up);
+                if (targetDelta != Vector3.zero)
+                {
+                    targetRotation = Quaternion.LookRotation(targetDelta, Vector3.up);
+                }
             }
 
             Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
@@ -157,7 +160,8 @@ namespace Boids
                 float v_dv = Vector3.Dot(v, dv);
                 if (dv_dv > 0.0f)
                 {
-                    float lambda = (max * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
+                    float dv_dv_inv = 1.0f / dv_dv;
+                    float lambda = Mathf.Sqrt((max * max + v_dv * v_dv * dv_dv_inv) * dv_dv_inv) - v_dv * dv_dv_inv;
                     dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
                 }
             }
