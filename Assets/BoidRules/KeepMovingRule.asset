@@ -10,8 +10,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: SwarmRule
-  m_EditorClassIdentifier: Assembly-CSharp:Boids:SwarmRule
-  maxRadius: 2
-  minRadius: 0.5
-  forwardAsymmetry: 0.8
+  m_Name: KeepMovingRule
+  m_EditorClassIdentifier: Assembly-CSharp:Boids:KeepMovingRule

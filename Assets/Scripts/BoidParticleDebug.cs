@@ -26,12 +26,12 @@ namespace Boids
             var debugTarget = GetOrCreate("Target", PrimitiveType.Cube);
             var debugTargetDirection = GetOrCreate("TargetDirection", PrimitiveType.Cube);
 
-            if (target != null && target.position.HasValue)
+            if (target != null && target.GetPosition(out Vector3 targetPosition))
             {
                 debugTarget.gameObject.SetActive(true);
                 debugTargetDirection.gameObject.SetActive(true);
-                debugTarget.position = target.position.Value;
-                SetTransformVector(debugTargetDirection, state.position, target.position.Value, 0.01f);
+                debugTarget.position = targetPosition;
+                SetTransformVector(debugTargetDirection, state.position, targetPosition, 0.01f);
 
                 // Color color = Color.white * (1.0f - force) + Color.green * force;
                 Color color = Color.green;

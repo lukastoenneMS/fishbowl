@@ -12,9 +12,58 @@ namespace Boids
     // Result of evaluating a boid rule for a given particle
     public class BoidTarget : IEquatable<BoidTarget>
     {
-        public readonly Vector3? position;
-        public readonly Vector3? direction;
-        public readonly float? speed;
+        private readonly Vector3? position;
+
+        private readonly Vector3? direction;
+        private readonly float? speed;
+
+        public bool GetPosition(out Vector3 pos)
+        {
+            if (position.HasValue)
+            {
+                pos = position.Value;
+                return true;
+            }
+            pos = Vector3.zero;
+            return false;
+        }
+
+        public bool GetDirection(Vector3 origin, out Vector3 dir)
+        {
+            if (position.HasValue)
+            {
+                dir = position.Value - origin;
+                return true;
+            }
+            else if (direction.HasValue)
+            {
+                dir = direction.Value;
+                return true;
+            }
+            dir = Vector3.zero;
+            return false;
+        }
+
+        public bool GetVelocity(Vector3 origin, out Vector3 vel)
+        {
+            if (speed.HasValue)
+            {
+                if (position.HasValue)
+                {
+                    Vector3 dir = position.Value - origin;
+                    vel = dir * speed.Value;
+                    return true;
+                }
+                else if (direction.HasValue)
+                {
+                    Vector3 dir = direction.Value;
+                    vel = dir * speed.Value;
+                    return true;
+                }
+            }
+            vel = Vector3.zero;
+            return false;
+        }
 
         public bool valid
         {
@@ -223,6 +272,27 @@ namespace Boids
                 priority = PriorityNone;
                 return false;
             }
+        }
+    }
+
+    /// <summary>
+    /// Rule to keep moving in the current direction at minimum speed.
+    /// </summary>
+    [CreateAssetMenu(fileName = "KeepMovingRule", menuName = "Boids/KeepMovingRule", order = 1)]
+    public class KeepMovingRule : BoidRule
+    {
+        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
+        {
+            if (state.direction == Vector3.zero)
+            {
+                target = null;
+                priority = PriorityNone;
+                return false;
+            }
+
+            target = new BoidTarget(state.direction, boid.Settings.MinSpeed);
+            priority = PriorityLow;
+            return true;
         }
     }
 }

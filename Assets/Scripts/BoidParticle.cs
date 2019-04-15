@@ -88,8 +88,7 @@ namespace Boids
                 // Adjust velocity change to not exceed max. velocity
                 targetForce = ClampedDelta(v, dv, settings.MaxSpeed);
 
-                Vector3 targetDelta = target.position.Value - predictedPosition;
-                if (targetDelta != Vector3.zero)
+                if (target.GetDirection(predictedPosition, out Vector3 targetDelta))
                 {
                     targetRotation = Quaternion.LookRotation(targetDelta, Vector3.up);
                 }
@@ -116,11 +115,27 @@ namespace Boids
         {
             float dtime = Time.fixedDeltaTime;
             Vector3 predictedPosition = state.position + dtime * state.velocity;
-            Vector3 targetDelta = target.position.Value - predictedPosition;
-            Vector3 targetDirection = targetDelta.normalized;
 
-            float projectedDelta = Vector3.Dot(targetDelta, state.direction);
-            float velocityChange = Mathf.Clamp(projectedDelta / dtime, 0.0f, settings.MaxAcceleration * dtime);
+            Vector3 targetVelocityDelta;
+            if (target.GetVelocity(predictedPosition, out Vector3 targetVelocity))
+            {
+                targetVelocityDelta = targetVelocity - state.velocity;
+            }
+            else if (target.GetDirection(predictedPosition, out Vector3 targetDelta))
+            {
+                // Try to reach target in one step
+                targetVelocityDelta = targetDelta / dtime;
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+
+            // Clamp velocity change to not exceed max. velocity
+            targetVelocityDelta = ClampedDelta(state.velocity, targetVelocityDelta, settings.MaxSpeed);
+
+            float projectedVelocity = Vector3.Dot(targetVelocityDelta, state.direction);
+            float velocityChange = Mathf.Clamp(projectedVelocity, 0.0f, settings.MaxAcceleration * dtime);
 
             return velocityChange * state.direction;
         }
