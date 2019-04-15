@@ -20,9 +20,15 @@ namespace Boids
         public float CurrentRuleBias = 0.0f;
 
         private readonly List<BoidParticle> boids = new List<BoidParticle>();
+        private readonly List<BoidTarget> ruleTargets = new List<BoidTarget>();
+        private readonly List<float> rulePriorities = new List<float>();
+
+        private BoidContext context;
 
         public void Awake()
         {
+            context = new BoidContext();
+
             GetComponentsInChildren<BoidParticle>(boids);
 
             foreach (BoidRule rule in rules)
@@ -53,39 +59,42 @@ namespace Boids
         {
             int numBoids = boids.Count;
 
+            context.Prepare(boids);
+            ruleTargets.Clear();
+            rulePriorities.Clear();
+            ruleTargets.Capacity = rules.Count;
+            rulePriorities.Capacity = rules.Count;
             foreach (BoidRule rule in rules)
             {
-                rule.Prepare(boids);
+                rule.Prepare();
+                ruleTargets.Add(null);
+                rulePriorities.Add(-1.0f);
             }
 
-            foreach (BoidParticle boid in boids)
+            for (int boidIndex = 0; boidIndex < boids.Count; ++boidIndex)
             {
+                BoidParticle boid = boids[boidIndex];
                 boid.GetDebug(out BoidParticleDebug dbg);
 
                 BoidState state = boid.GetState();
 
-                BoidTarget newTarget = null;
-                int newRuleIndex = -1;
-                float maxPriority = -1.0f;
-                for (int i = 0; i < rules.Count; ++i)
+                for (int ruleIndex = 0; ruleIndex < rules.Count; ++ruleIndex)
                 {
-                    BoidRule rule = rules[i];
-                    if (rule.Evaluate(boid, state, out BoidTarget target, out float priority))
+                    BoidRule rule = rules[ruleIndex];
+                    if (rule.Evaluate(context, boid, boidIndex, state, out BoidTarget target, out float priority))
                     {
-                        if (i == boid.CurrentRuleIndex)
-                        {
-                            // Add bias to the current rule's importance to avoid immediate switching
-                            priority += CurrentRuleBias;
-                        }
-
-                        if (priority > maxPriority)
-                        {
-                            newRuleIndex = i;
-                            maxPriority = priority;
-                            newTarget = target;
-                        }
+                        ruleTargets[ruleIndex] = target;
+                        rulePriorities[ruleIndex] = priority;
+                    }
+                    else
+                    {
+                        ruleTargets[ruleIndex] = null;
+                        rulePriorities[ruleIndex] = -1.0f;
                     }
                 }
+
+                // BoidTarget newTarget = SelectTargetByPriority(boid.CurrentRuleIndex);
+                BoidTarget newTarget = SelectTargetByAverage(state, boid.CurrentRuleIndex);
 
                 boid.ApplyPhysics(newTarget);
 
@@ -95,10 +104,75 @@ namespace Boids
                 }
             }
 
+            context.Cleanup();
             foreach (BoidRule rule in rules)
             {
                 rule.Cleanup();
             }
+        }
+
+        private BoidTarget SelectTargetByPriority(int currentRuleIndex)
+        {
+            BoidTarget newTarget = null;
+            float maxPriority = -1.0f;
+            for (int ruleIndex = 0; ruleIndex < rules.Count; ++ruleIndex)
+            {
+                BoidTarget target = ruleTargets[ruleIndex];
+                if (target != null)
+                {
+                    float priority = rulePriorities[ruleIndex];
+                    if (ruleIndex == currentRuleIndex)
+                    {
+                        // Add bias to the current rule's importance to avoid immediate switching
+                        priority += CurrentRuleBias;
+                    }
+
+                    if (priority > maxPriority)
+                    {
+                        maxPriority = priority;
+                        newTarget = target;
+                    }
+                }
+            }
+
+            return newTarget;
+        }
+
+        private BoidTarget SelectTargetByAverage(BoidState state, int currentRuleIndex)
+        {
+            BoidTarget newTarget = null;
+            float totweight = 0.0f;
+            for (int ruleIndex = 0; ruleIndex < rules.Count; ++ruleIndex)
+            {
+                BoidTarget target = ruleTargets[ruleIndex];
+                if (target != null)
+                {
+                    float priority = rulePriorities[ruleIndex];
+                    if (ruleIndex == currentRuleIndex)
+                    {
+                        // Add bias to the current rule's importance to avoid immediate switching
+                        priority += CurrentRuleBias;
+                    }
+
+                    totweight += priority;
+                    if (newTarget == null)
+                    {
+                        newTarget = target;
+                    }
+                    else
+                    {
+                        newTarget.direction += target.direction * priority;
+                        newTarget.speed += target.speed * priority;
+                    }
+                }
+            }
+            if (totweight > 0.0f)
+            {
+                newTarget.direction.Normalize();
+                newTarget.speed /= totweight;
+            }
+
+            return newTarget;
         }
     }
 }

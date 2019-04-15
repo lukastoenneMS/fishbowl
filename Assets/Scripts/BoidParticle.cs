@@ -88,9 +88,9 @@ namespace Boids
                 // Adjust velocity change to not exceed max. velocity
                 targetForce = ClampedDelta(v, dv, settings.MaxSpeed);
 
-                if (target.GetDirection(predictedPosition, out Vector3 targetDelta))
+                if (target.direction != Vector3.zero)
                 {
-                    targetRotation = Quaternion.LookRotation(targetDelta, Vector3.up);
+                    targetRotation = Quaternion.LookRotation(target.direction, Vector3.up);
                 }
             }
 
@@ -98,10 +98,14 @@ namespace Boids
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
             deltaAngle = (deltaAngle + 180.0f) % 360.0f - 180.0f;
 
-            float targetAngVelChange = Mathf.Deg2Rad * deltaAngle / dtime;
-            Vector3 angv = state.angularVelocity;
-            Vector3 dangv = deltaAxis * targetAngVelChange;
-            Vector3 targetTorque = ClampedDelta(angv, dangv, Mathf.Deg2Rad * settings.MaxAngularVelocity);
+            Vector3 targetTorque = Vector3.zero;
+            if (deltaAngle != 0.0f)
+            {
+                float targetAngVelChange = Mathf.Deg2Rad * deltaAngle / dtime;
+                Vector3 angv = state.angularVelocity;
+                Vector3 dangv = deltaAxis * targetAngVelChange;
+                targetTorque = ClampedDelta(angv, dangv, Mathf.Deg2Rad * settings.MaxAngularVelocity);
+            }
 
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             if (rb)
@@ -116,21 +120,7 @@ namespace Boids
             float dtime = Time.fixedDeltaTime;
             Vector3 predictedPosition = state.position + dtime * state.velocity;
 
-            Vector3 targetVelocityDelta;
-            if (target.GetVelocity(predictedPosition, out Vector3 targetVelocity))
-            {
-                targetVelocityDelta = targetVelocity - state.velocity;
-            }
-            else if (target.GetDirection(predictedPosition, out Vector3 targetDelta))
-            {
-                // Try to reach target in one step
-                targetVelocityDelta = targetDelta / dtime;
-            }
-            else
-            {
-                return Vector3.zero;
-            }
-
+            Vector3 targetVelocityDelta = target.GetVelocity() - state.velocity;
             // Clamp velocity change to not exceed max. velocity
             targetVelocityDelta = ClampedDelta(state.velocity, targetVelocityDelta, settings.MaxSpeed);
 

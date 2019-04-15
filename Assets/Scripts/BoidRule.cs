@@ -12,75 +12,17 @@ namespace Boids
     // Result of evaluating a boid rule for a given particle
     public class BoidTarget : IEquatable<BoidTarget>
     {
-        private readonly Vector3? position;
+        public Vector3 direction;
+        public float speed;
 
-        private readonly Vector3? direction;
-        private readonly float? speed;
-
-        public bool GetPosition(out Vector3 pos)
+        public Vector3 GetVelocity()
         {
-            if (position.HasValue)
-            {
-                pos = position.Value;
-                return true;
-            }
-            pos = Vector3.zero;
-            return false;
-        }
-
-        public bool GetDirection(Vector3 origin, out Vector3 dir)
-        {
-            if (position.HasValue)
-            {
-                dir = position.Value - origin;
-                return true;
-            }
-            else if (direction.HasValue)
-            {
-                dir = direction.Value;
-                return true;
-            }
-            dir = Vector3.zero;
-            return false;
-        }
-
-        public bool GetVelocity(Vector3 origin, out Vector3 vel)
-        {
-            if (speed.HasValue)
-            {
-                if (position.HasValue)
-                {
-                    Vector3 dir = position.Value - origin;
-                    vel = dir * speed.Value;
-                    return true;
-                }
-                else if (direction.HasValue)
-                {
-                    Vector3 dir = direction.Value;
-                    vel = dir * speed.Value;
-                    return true;
-                }
-            }
-            vel = Vector3.zero;
-            return false;
-        }
-
-        public bool valid
-        {
-            get
-            {
-                return position.HasValue || direction.HasValue;
-            }
+            return direction.normalized * speed;
         }
 
         public bool Equals(BoidTarget other)
         {
-            return position == other.position || (direction == other.direction && speed == other.speed);
-        }
-
-        public BoidTarget(Vector3 _position)
-        {
-            position = _position;
+            return direction == other.direction && speed == other.speed;
         }
 
         public BoidTarget(Vector3 _direction, float _speed)
@@ -88,21 +30,37 @@ namespace Boids
             direction = _direction;
             speed = _speed;
         }
+    }
 
-        public BoidTarget transformed(Transform transform)
+    public class BoidContext
+    {
+        private const int maxPointsPerLeafNode = 32;
+
+        private KDTree tree;
+        public KDTree Tree => tree;
+        private KDQuery query;
+        public KDQuery Query => query;
+
+        public BoidContext()
         {
-            if (position.HasValue)
+            int maxPointsPerLeafNode = 32;
+            tree = new KDTree(maxPointsPerLeafNode);
+            query = new KDQuery();
+        }
+
+        public void Prepare(List<BoidParticle> boids)
+        {
+            tree.SetCount(boids.Count);
+            for (int i = 0; i < boids.Count; ++i)
             {
-                return new BoidTarget(transform.TransformPoint(position.Value));
+                BoidState state = boids[i].GetState();
+                tree.Points[i] = state.position;
             }
-            else if (direction.HasValue && speed.HasValue)
-            {
-                return new BoidTarget(transform.TransformDirection(direction.Value), speed.Value);
-            }
-            else
-            {
-                return null;
-            }
+            tree.Rebuild();
+        }
+
+        public void Cleanup()
+        {
         }
     }
 
@@ -122,7 +80,7 @@ namespace Boids
         {
         }
 
-        public virtual void Prepare(List<BoidParticle> boids)
+        public virtual void Prepare()
         {
         }
 
@@ -130,7 +88,7 @@ namespace Boids
         {
         }
 
-        public virtual bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
+        public virtual bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
             target = null;
             priority = 0.0f;
@@ -144,13 +102,13 @@ namespace Boids
         public float radius = 1.0f;
         public Vector3 center = Vector3.zero;
 
-        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
+        public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
             Vector3 localPos = state.position - center;
             Vector3 goal = new Vector3(localPos.x, 0.0f, localPos.z);
             goal = goal.normalized * radius + center;
 
-            target = new BoidTarget(goal);
+            target = new BoidTarget(goal - state.position, boid.Settings.MaxSpeed);
             priority = PriorityLow;
             return true;
         }
@@ -175,42 +133,9 @@ namespace Boids
         [Range(0.0f, 1.0f)]
         public float forwardAsymmetry = 0.5f;
 
-        private KDTree tree;
-        private KDQuery query;
-        private List<int> queryResults;
+        private readonly List<int> queryResults = new List<int>();
 
-        public override void OnAwake()
-        {
-            int maxPointsPerLeafNode = 32;
-            tree = new KDTree(maxPointsPerLeafNode);
-            query = new KDQuery();
-            queryResults = new List<int>();
-        }
-
-        public override void OnDestroy()
-        {
-            tree = null;
-            query = null;
-            queryResults = null;
-        }
-
-        public override void Prepare(List<BoidParticle> boids)
-        {
-            tree.SetCount(boids.Count);
-            for (int i = 0; i < boids.Count; ++i)
-            {
-                BoidState state = boids[i].GetState();
-                tree.Points[i] = state.position;
-            }
-            tree.Rebuild();
-        }
-
-        public override void Cleanup()
-        {
-            queryResults.Clear();
-        }
-
-        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
+        public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
             boid.GetDebug(out var dbg);
             if (dbg != null)
@@ -227,13 +152,19 @@ namespace Boids
             }
 
             queryResults.Clear();
-            query.Radius(tree, state.position, maxRadius, queryResults);
+            context.Query.Radius(context.Tree, state.position, maxRadius, queryResults);
 
             float totweight = 0.0f;
             Vector3 goal = Vector3.zero;
             foreach (int idx in queryResults)
             {
-                Vector3 p = tree.Points[idx];
+                // Skip own point
+                if (idx == boidIndex)
+                {
+                    continue;
+                }
+
+                Vector3 p = context.Tree.Points[idx];
                 Vector3 d = p - state.position;
                 float dist = d.magnitude;
 
@@ -262,7 +193,7 @@ namespace Boids
             if (totweight > 0.0f)
             {
                 goal /= totweight;
-                target = new BoidTarget(goal);
+                target = new BoidTarget(goal - state.position, boid.Settings.MaxAcceleration);
                 priority = PriorityMedium;
                 return true;
             }
@@ -275,13 +206,149 @@ namespace Boids
         }
     }
 
+    [CreateAssetMenu(fileName = "AvoidCollisionRule", menuName = "Boids/AvoidCollisionRule", order = 1)]
+    public class AvoidCollisionRule : BoidRule
+    {
+        /// <summary>
+        /// Maximum collision detection distance.
+        /// </summary>
+        public float maxRadius = 1.0f;
+
+        /// <summary>
+        /// Minimum distance allowed between particles.
+        /// </summary>
+        public float minRadius = 0.1f;
+
+        /// <summary>
+        /// Maximum number of iterations per step to try and find a non-colliding direction.
+        /// </summary>
+        public int maxIterations = 5;
+
+        private readonly List<int> queryResults = new List<int>();
+
+        public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
+        {
+            boid.GetDebug(out var dbg);
+            if (dbg != null)
+            {
+                dbg.ClearCollision();
+            }
+
+            float deltaRadius = maxRadius - minRadius;
+            if (deltaRadius <= 0.0f)
+            {
+                target = null;
+                priority = PriorityNone;
+                return false;
+            }
+
+            queryResults.Clear();
+            context.Query.Radius(context.Tree, state.position, maxRadius, queryResults);
+
+            Vector3 dir = state.direction;
+            float maxweight = 0.0f;
+            foreach (int idx in queryResults)
+            {
+                // Skip own point
+                if (idx == boidIndex)
+                {
+                    Debug.Assert(context.Tree.Points[idx] == state.position);
+                    continue;
+                }
+
+                Vector3 colliderPos = context.Tree.Points[idx];
+                Vector3 colliderDir = colliderPos - state.position;
+
+                if (GetInsidePositiveConeProjection(dir, colliderDir, minRadius, out Vector3 newDir, dbg))
+                {
+                    dir = newDir;
+                    // TODO find useful metric for correction weight
+                    maxweight = 1.0f;
+                }
+            }
+            if (maxweight > 0.0f)
+            {
+                target = new BoidTarget(dir, state.velocity.magnitude);
+                priority = PriorityHigh;
+                return true;
+            }
+            else
+            {
+                target = null;
+                priority = PriorityNone;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Project vectors inside the positive cone onto it, leave vectors outside the cone unchanged.
+        /// </summary>
+        private static bool GetInsidePositiveConeProjection(Vector3 dir, Vector3 coneDir, float radius, out Vector3 result, BoidParticleDebug dbg)
+        {
+            float sqrRadius = radius * radius;
+            Vector3 normConeDir = coneDir.normalized;
+
+            // Distance to the closest valid point on the sphere
+            float sqrConeSide = coneDir.sqrMagnitude - sqrRadius;
+            // Special case: inside the sphere, move straight away from the collider
+            if (sqrConeSide <= 0.0f)
+            {
+                result = -normConeDir * (radius - coneDir.magnitude);
+                return true;
+            }
+
+            // Length of dir vector in direction of the cone
+            float coneDot = Vector3.Dot(dir, normConeDir);
+            // Negative cone case, ignore
+            if (coneDot <= 0.0f)
+            {
+                result = dir;
+                return false;
+            }
+
+            if (dbg != null)
+            {
+                float mag = dir.magnitude;
+                float radiusFactor = mag > 0.0f ? coneDot / mag : 0.0f;
+                dbg.AddCollisionCone(Vector3.one*0.0001f, Vector3.one*0.0001f, coneDir, radius * radiusFactor);
+            }
+
+            // Split
+            Vector3 conePart = coneDot * normConeDir;
+            Vector3 orthoPart = dir - conePart;
+            Debug.Assert(Mathf.Abs(Vector3.Dot(conePart, orthoPart)) < 0.01f);
+
+            float sqrOrtho = orthoPart.sqrMagnitude;
+            if (sqrOrtho > 0.0f)
+            {
+                float sqrTanConeAngle = sqrRadius / (coneDir.sqrMagnitude - sqrRadius);
+
+                float sqrCone = conePart.sqrMagnitude;
+                float sqrScale = sqrCone / sqrOrtho * sqrTanConeAngle;
+                // scale >= 1 means the vector is outside the cone
+                if (sqrScale < 1.0f)
+                {
+                    result = conePart + orthoPart * Mathf.Sqrt(sqrScale);
+                    return true;
+                }
+                else
+                {
+                    result = dir;
+                    return false;
+                }
+            }
+            result = dir;
+            return false;
+        }
+    }
+
     /// <summary>
     /// Rule to keep moving in the current direction at minimum speed.
     /// </summary>
     [CreateAssetMenu(fileName = "KeepMovingRule", menuName = "Boids/KeepMovingRule", order = 1)]
     public class KeepMovingRule : BoidRule
     {
-        public override bool Evaluate(BoidParticle boid, BoidState state, out BoidTarget target, out float priority)
+        public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
             if (state.direction == Vector3.zero)
             {

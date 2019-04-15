@@ -26,12 +26,12 @@ namespace Boids
             var debugTarget = GetOrCreate("Target", PrimitiveType.Cube);
             var debugTargetDirection = GetOrCreate("TargetDirection", PrimitiveType.Cube);
 
-            if (target != null && target.GetPosition(out Vector3 targetPosition))
+            if (target != null)
             {
                 debugTarget.gameObject.SetActive(true);
                 debugTargetDirection.gameObject.SetActive(true);
-                debugTarget.position = targetPosition;
-                SetTransformVector(debugTargetDirection, state.position, targetPosition, 0.01f);
+                debugTarget.position = target.direction;
+                SetTransformVector(debugTargetDirection, state.position, target.direction, 0.01f);
 
                 // Color color = Color.white * (1.0f - force) + Color.green * force;
                 Color color = Color.green;
@@ -73,6 +73,30 @@ namespace Boids
         public void ClearSwarm()
         {
             ClearPool("Swarm");
+        }
+
+        public void AddCollisionCone(Vector3 conePart, Vector3 orthoPart, Vector3 colliderDir, float radius)
+        {
+            var state = particle.GetState();
+            var collisionConePart = GetOrCreatePooled("collisionConePart", PrimitiveType.Cube);
+            var collisionOrthoPart = GetOrCreatePooled("collisionOrthoPart", PrimitiveType.Cube);
+            var collisionDisk = GetOrCreatePooled("CollisionDisk", PrimitiveType.Sphere);
+
+            SetTransformDirection(collisionConePart, state.position, conePart, 0.01f);
+            SetTransformDirection(collisionOrthoPart, state.position, orthoPart, 0.01f);
+            collisionDisk.position = state.position + colliderDir;
+            collisionDisk.localScale = Vector3.one * radius * 2.0f;
+
+            collisionConePart.GetComponent<Renderer>().material.color = Color.red;
+            collisionOrthoPart.GetComponent<Renderer>().material.color = Color.green;
+            collisionDisk.GetComponent<Renderer>().material.color = new Color(1.0f, 1.0f, 0.0f, 0.2f);
+        }
+
+        public void ClearCollision()
+        {
+            ClearPool("collisionConePart");
+            ClearPool("collisionOrthoPart");
+            ClearPool("CollisionDisk");
         }
 
         private Transform GetOrCreate(string name, PrimitiveType prim)
@@ -130,11 +154,11 @@ namespace Boids
         private Transform CreateDebugPrimitive(string name, PrimitiveType prim)
         {
             var dbg = GameObject.CreatePrimitive(prim).transform;
+            // We don't want a collider on debug objects
+            dbg.GetComponent<Collider>().enabled = false;
             dbg.name = name;
             dbg.parent = debugObjects;
             dbg.localScale = new Vector3(0.02f, 0.02f, 0.02f);
-            // We don't want a collider on debug objects
-            GameObject.Destroy(dbg.GetComponent<Collider>());
             return dbg;
         }
     }
