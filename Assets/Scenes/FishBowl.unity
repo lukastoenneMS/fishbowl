@@ -302,6 +302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rules:
   - {fileID: 11400000, guid: b5aef46d263679846aafad02edb55223, type: 2}
+  - {fileID: 11400000, guid: 1e48695ceb72cc140b357291609636c1, type: 2}
   - {fileID: 11400000, guid: c8115e4f06b61cb4ea41c7f3ae565351, type: 2}
   CurrentRuleBias: 0
 --- !u!114 &669593042

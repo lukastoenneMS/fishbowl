@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: AvoidCollisionRule
   m_EditorClassIdentifier: Assembly-CSharp:Boids:AvoidCollisionRule
-  maxRadius: 1
-  minRadius: 0.1
+  maxRadius: 1.5
+  minRadius: 0.3
   maxIterations: 5

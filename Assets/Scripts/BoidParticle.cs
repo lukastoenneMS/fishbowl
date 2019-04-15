@@ -60,7 +60,7 @@ namespace Boids
             BoidState state = new BoidState();
             state.position = rb.position;
             state.velocity = rb.velocity;
-            state.direction = rb.transform.forward;
+            state.direction = rb.transform.forward.normalized;
             state.roll = (rb.rotation.eulerAngles.z + 180.0f) % 360.0f - 180.0f;
             state.angularVelocity = rb.angularVelocity;
 

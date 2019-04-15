@@ -310,6 +310,7 @@ namespace Boids
             {
                 float mag = dir.magnitude;
                 float radiusFactor = mag > 0.0f ? coneDot / mag : 0.0f;
+                // float radiusFactor = mag > 0.0f ? mag : 0.0f;
                 dbg.AddCollisionCone(Vector3.one*0.0001f, Vector3.one*0.0001f, coneDir, radius * radiusFactor);
             }
 
