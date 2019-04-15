@@ -242,7 +242,7 @@ Rigidbody:
   m_GameObject: {fileID: 3713867872635992076}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0.4
+  m_Drag: 0.6
   m_AngularDrag: 5
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -277,9 +277,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings:
     MinSpeed: 1
-    MaxSpeed: 10
+    MaxSpeed: 7
     MaxAcceleration: 0.5
-    MaxAngularVelocity: 50
+    MaxAngularVelocity: 30
     PersonalSpace: 1
     Banking: 1
     Pitch: 1
