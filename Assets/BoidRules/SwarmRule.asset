@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: SwarmRule
   m_EditorClassIdentifier: Assembly-CSharp:Boids:SwarmRule
-  maxRadius: 1
+  maxRadius: 3
   minRadius: 0.1
   forwardAsymmetry: 0.5

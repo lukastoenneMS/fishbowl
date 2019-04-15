@@ -279,10 +279,11 @@ MonoBehaviour:
     MinSpeed: 1
     MaxSpeed: 10
     MaxAcceleration: 0.5
-    MaxAngularVelocity: 0.1
+    MaxAngularVelocity: 50
     PersonalSpace: 1
     Banking: 1
     Pitch: 1
+  CurrentRuleIndex: -1
   EnableDebugObjects: 0
 --- !u!1 &7795210021907508416
 GameObject:

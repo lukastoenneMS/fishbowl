@@ -15,7 +15,7 @@ namespace Boids
         public float MinSpeed = 0.0f;
         public float MaxSpeed = 10.0f;
         public float MaxAcceleration = 0.5f;
-        public float MaxAngularVelocity = 0.5f;
+        public float MaxAngularVelocity = 90.0f;
         public float PersonalSpace = 1.0f;
 
         public float Banking = 1.0f;
@@ -28,6 +28,7 @@ namespace Boids
         public Vector3 velocity;
         public Vector3 direction;
         public float roll;
+        public Vector3 angularVelocity;
     }
 
     [System.Serializable]
@@ -61,6 +62,7 @@ namespace Boids
             state.velocity = rb.velocity;
             state.direction = rb.transform.forward;
             state.roll = (rb.rotation.eulerAngles.z + 180.0f) % 360.0f - 180.0f;
+            state.angularVelocity = rb.angularVelocity;
 
             return state;
         }
@@ -81,44 +83,23 @@ namespace Boids
             Quaternion targetRotation = uprightRotation;
             if (target != null)
             {
-                Vector3 targetDelta = target.position.Value - predictedPosition;
-                Vector3 targetDirection = targetDelta.normalized;
                 Vector3 v = state.velocity;
                 Vector3 dv = GetTargetVelocityChange(state, target);
-
                 // Adjust velocity change to not exceed max. velocity
-                if ((v + dv).sqrMagnitude > settings.MaxSpeed * settings.MaxSpeed)
-                {
-                    // Solves equation: ||v + lambda * dv|| = maxVelocity
-                    // lambda clamped to [0, 1] to not accelerate backwards and not add more than desired velocity
-                    float v_v = Vector3.Dot(v, v);
-                    float dv_dv = Vector3.Dot(dv, dv);
-                    float v_dv = Vector3.Dot(v, dv);
-                    if (dv_dv > 0.0f)
-                    {
-                        float lambda = (settings.MaxSpeed * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
-                        dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
-                    }
-                }
+                targetForce = ClampedDelta(v, dv, settings.MaxSpeed);
 
-                targetForce = dv;
+                Vector3 targetDelta = target.position.Value - predictedPosition;
                 targetRotation = Quaternion.LookRotation(targetDelta, Vector3.up);
             }
-
-            // float targetSpeed = Mathf.Clamp(projectedDelta / dtime, 0.0f, settings.MaxSpeed);
-            // float targetAccel = Mathf.Clamp(projectedDelta / (dtime*dtime), 0.0f, settings.MaxAcceleration);
-            // Vector3 targetVelocity = state.direction * targetSpeed;
-            // Vector3 targetForce = state.direction * targetAccel;
 
             Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
             deltaAngle = (deltaAngle + 180.0f) % 360.0f - 180.0f;
-            if (dbg != null)
-            {
-                dbg.SetPhysics(deltaAngle);
-            }
-            float targetAngVelChange = Math.Min(Mathf.Deg2Rad * deltaAngle / dtime, settings.MaxAngularVelocity);
-            Vector3 targetTorque = deltaAxis * targetAngVelChange;
+
+            float targetAngVelChange = Mathf.Deg2Rad * deltaAngle / dtime;
+            Vector3 angv = state.angularVelocity;
+            Vector3 dangv = deltaAxis * targetAngVelChange;
+            Vector3 targetTorque = ClampedDelta(angv, dangv, Mathf.Deg2Rad * settings.MaxAngularVelocity);
 
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             if (rb)
@@ -163,6 +144,24 @@ namespace Boids
                 dbg = null;
                 return false;
             }
+        }
+
+        private static Vector3 ClampedDelta(Vector3 v, Vector3 dv, float max)
+        {
+            if ((v + dv).sqrMagnitude > max * max)
+            {
+                // Solves equation: ||v + lambda * dv|| = max
+                // lambda clamped to [0, 1] to not accelerate backwards and not add more than desired velocity
+                float v_v = Vector3.Dot(v, v);
+                float dv_dv = Vector3.Dot(dv, dv);
+                float v_dv = Vector3.Dot(v, dv);
+                if (dv_dv > 0.0f)
+                {
+                    float lambda = (max * Mathf.Sqrt(v_v * dv_dv + v_dv * v_dv) - v_dv) / dv_dv;
+                    dv *= Mathf.Clamp(lambda, 0.0f, 1.0f);
+                }
+            }
+            return dv;
         }
     }
 }
