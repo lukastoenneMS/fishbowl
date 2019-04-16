@@ -1,4 +1,3 @@
-* Implement max. pitch
 * Implement rule weight and fuzzy selection/averaging
 * Fix bounding box automatic resizing due to debug objects which moves the main particle objects
 * Optimize by avoiding BoidParticle component access during swarm computation (-> array)

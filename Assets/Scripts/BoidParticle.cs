@@ -73,7 +73,6 @@ namespace Boids
             BoidState state = GetState();
             Quaternion uprightRotation = Quaternion.LookRotation(state.direction, Vector3.up);
             Quaternion stateRotation = uprightRotation * Quaternion.Euler(0.0f, 0.0f, state.roll);
-            Quaternion test = Quaternion.Euler(0.0f, 0.0f, state.roll);
 
             GetDebug(out BoidParticleDebug dbg);
 
@@ -92,6 +91,13 @@ namespace Boids
                 {
                     targetRotation = Quaternion.LookRotation(target.direction, Vector3.up);
                 }
+            }
+
+            // Limit pitch and roll to allowed range
+            {
+                Vector3 euler = targetRotation.eulerAngles;
+                euler.x = Mathf.Clamp((euler.x + 180.0f) % 360.0f - 180.0f, -settings.Pitch, settings.Pitch);
+                targetRotation = Quaternion.Euler(euler);
             }
 
             Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
