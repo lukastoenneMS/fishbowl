@@ -277,7 +277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settings:
     MinSpeed: 0.5
-    MaxSpeed: 15
+    MaxSpeed: 12
     MaxAcceleration: 4
     MaxAngularVelocity: 30
     MaxAngularAcceleration: 6
