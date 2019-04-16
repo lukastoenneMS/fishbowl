@@ -76,7 +76,7 @@ namespace Boids
                 BoidParticle boid = boids[boidIndex];
                 boid.GetDebug(out BoidParticleDebug dbg);
 
-                BoidState state = boid.GetState();
+                BoidState state = context.States[boidIndex];
 
                 for (int ruleIndex = 0; ruleIndex < rules.Count; ++ruleIndex)
                 {
@@ -96,7 +96,7 @@ namespace Boids
                 // BoidTarget newTarget = SelectTargetByPriority(boid.CurrentRuleIndex);
                 BoidTarget newTarget = SelectTargetByAverage(state, boid.CurrentRuleIndex);
 
-                boid.ApplyPhysics(newTarget);
+                boid.ApplyPhysics(state, newTarget);
 
                 if (dbg != null)
                 {

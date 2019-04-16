@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 
 using Boids;
+using Microsoft.MixedReality.Toolkit;
+using Microsoft.MixedReality.Toolkit.Utilities;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -22,6 +24,15 @@ public class FishBowl : MonoBehaviour
         {
             Debug.LogWarning("No boid brain component found");
             enabled = false;
+        }
+
+        foreach (var rule in brain.Rules)
+        {
+            var goalRule = rule as GoalRule;
+            if (goalRule != null)
+            {
+                goalRule.goal = CameraCache.Main.gameObject;
+            }
         }
     }
 

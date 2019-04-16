@@ -41,6 +41,9 @@ namespace Boids
         private KDQuery query;
         public KDQuery Query => query;
 
+        private readonly List<BoidState> states = new List<BoidState>();
+        public List<BoidState> States => states;
+
         public BoidContext()
         {
             int maxPointsPerLeafNode = 32;
@@ -50,10 +53,14 @@ namespace Boids
 
         public void Prepare(List<BoidParticle> boids)
         {
+            states.Capacity = boids.Count;
+            states.Clear();
             tree.SetCount(boids.Count);
+
             for (int i = 0; i < boids.Count; ++i)
             {
                 BoidState state = boids[i].GetState();
+                states.Add(state);
                 tree.Points[i] = state.position;
             }
             tree.Rebuild();

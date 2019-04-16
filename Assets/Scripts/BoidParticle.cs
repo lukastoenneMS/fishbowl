@@ -67,10 +67,9 @@ namespace Boids
             return state;
         }
 
-        public void ApplyPhysics(BoidTarget target)
+        public void ApplyPhysics(BoidState state, BoidTarget target)
         {
             float dtime = Time.fixedDeltaTime;
-            BoidState state = GetState();
             Quaternion uprightRotation = Quaternion.LookRotation(state.direction, Vector3.up);
             Quaternion stateRotation = uprightRotation * Quaternion.Euler(0.0f, 0.0f, state.roll);
 
