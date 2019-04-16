@@ -50,10 +50,12 @@ namespace Boids
 
             Vector3 dir = state.direction;
             bool hasCorrection = false;
+            float weight = 0.0f;
             for (int iter = 0; iter < maxIterations; ++iter)
             {
-                bool hasCollision = false;
+                int numCollisions = 0;
                 float distance = 0.0f;
+                float maxDistance = 0.0f;
                 Vector3 gradient = Vector3.zero;
                 foreach (int idx in queryResults)
                 {
@@ -70,15 +72,17 @@ namespace Boids
                     if (GetInsidePositiveConeDistance(dir, colliderDir, minRadius, out float coneDistance, out Vector3 coneGradient, dbg))
                     {
                         // TODO find useful metric for correction weight
-                        hasCollision = true;
+                        ++numCollisions;
                         distance += coneDistance;
+                        maxDistance = Mathf.Max(maxDistance, coneDistance);
                         gradient += coneGradient;
                     }
                 }
-                if (hasCollision)
+                if (numCollisions > 0)
                 {
                     hasCorrection = true;
                     dir -= gradient * distance;
+                    weight = maxDistance;
                 }
                 else
                 {
@@ -89,7 +93,7 @@ namespace Boids
             if (hasCorrection)
             {
                 target = new BoidTarget(dir, state.velocity.magnitude);
-                priority = PriorityHigh;
+                priority = PriorityHigh * weight;
                 return true;
             }
             else
