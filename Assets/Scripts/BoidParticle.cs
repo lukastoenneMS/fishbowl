@@ -16,6 +16,7 @@ namespace Boids
         public float MaxSpeed = 10.0f;
         public float MaxAcceleration = 0.5f;
         public float MaxAngularVelocity = 90.0f;
+        public float MaxAngularAcceleration = 10.0f;
         public float PersonalSpace = 1.0f;
 
         public float Banking = 1.0f;
@@ -102,6 +103,7 @@ namespace Boids
             Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
             deltaAngle = (deltaAngle + 180.0f) % 360.0f - 180.0f;
+            deltaAngle = Mathf.Clamp(deltaAngle, -settings.MaxAngularAcceleration * dtime, settings.MaxAngularAcceleration * dtime);
 
             Vector3 targetTorque = Vector3.zero;
             if (deltaAngle != 0.0f)
