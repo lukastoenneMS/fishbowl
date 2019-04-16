@@ -33,7 +33,10 @@ namespace Boids
 
             foreach (BoidRule rule in rules)
             {
-                rule.OnAwake();
+                if (rule)
+                {
+                    rule.OnAwake();
+                }
             }
         }
 
@@ -41,7 +44,10 @@ namespace Boids
         {
             foreach (BoidRule rule in rules)
             {
-                rule.OnDestroy();
+                if (rule)
+                {
+                    rule.OnDestroy();
+                }
             }
         }
 
@@ -66,7 +72,10 @@ namespace Boids
             rulePriorities.Capacity = rules.Count;
             foreach (BoidRule rule in rules)
             {
-                rule.Prepare();
+                if (rule)
+                {
+                    rule.Prepare();
+                }
                 ruleTargets.Add(null);
                 rulePriorities.Add(-1.0f);
             }
@@ -81,7 +90,7 @@ namespace Boids
                 for (int ruleIndex = 0; ruleIndex < rules.Count; ++ruleIndex)
                 {
                     BoidRule rule = rules[ruleIndex];
-                    if (rule.Evaluate(context, boid, boidIndex, state, out BoidTarget target, out float priority))
+                    if (rule && rule.Evaluate(context, boid, boidIndex, state, out BoidTarget target, out float priority))
                     {
                         ruleTargets[ruleIndex] = target;
                         rulePriorities[ruleIndex] = priority;
@@ -107,7 +116,10 @@ namespace Boids
             context.Cleanup();
             foreach (BoidRule rule in rules)
             {
-                rule.Cleanup();
+                if (rule)
+                {
+                    rule.Cleanup();
+                }
             }
         }
 
