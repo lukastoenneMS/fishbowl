@@ -568,7 +568,7 @@ PlayerSettings:
   metroSplashScreenUseBackgroundColor: 0
   platformCapabilities:
     WindowsStoreApps:
-      SpatialPerception: True
+      SpatialPerception: False
   metroTargetDeviceFamilies: {}
   metroFTAName: 
   metroFTAFileTypes: []

@@ -25,7 +25,10 @@ public class FishBowl : MonoBehaviour
             Debug.LogWarning("No boid brain component found");
             enabled = false;
         }
+    }
 
+    void OnEnable()
+    {
         foreach (var rule in brain.Rules)
         {
             var goalRule = rule as GoalRule;
