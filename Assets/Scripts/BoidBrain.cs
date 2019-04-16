@@ -94,7 +94,7 @@ namespace Boids
                 }
 
                 // BoidTarget newTarget = SelectTargetByPriority(boid.CurrentRuleIndex);
-                BoidTarget newTarget = SelectTargetByAverage(state, boid.CurrentRuleIndex);
+                BoidTarget newTarget = SelectTargetByWeightedAverage(state, boid.CurrentRuleIndex);
 
                 boid.ApplyPhysics(state, newTarget);
 
@@ -138,7 +138,7 @@ namespace Boids
             return newTarget;
         }
 
-        private BoidTarget SelectTargetByAverage(BoidState state, int currentRuleIndex)
+        private BoidTarget SelectTargetByWeightedAverage(BoidState state, int currentRuleIndex)
         {
             BoidTarget newTarget = null;
             float totweight = 0.0f;
@@ -154,15 +154,17 @@ namespace Boids
                         priority += CurrentRuleBias;
                     }
 
-                    totweight += priority;
+                    // Exponential weight based on priority
+                    float weight = Mathf.Exp(priority);
+                    totweight += weight;
                     if (newTarget == null)
                     {
                         newTarget = target;
                     }
                     else
                     {
-                        newTarget.direction += target.direction * priority;
-                        newTarget.speed += target.speed * priority;
+                        newTarget.direction += target.direction * weight;
+                        newTarget.speed += target.speed * weight;
                     }
                 }
             }
