@@ -63,27 +63,30 @@ namespace Boids
                 Vector3 delta = queryState.position - state.position;
                 float dist = delta.magnitude;
 
-                // float weight = Mathf.Clamp(1.0f - (dist - minRadius) / deltaRadius, 0.0f, 1.0f);
-                float weight = Mathf.Clamp(1.0f - dist / maxRadius, 0.0f, 1.0f);
+                float swarmWeight = Mathf.Clamp(1.0f - (dist - minRadius) / deltaRadius, 0.0f, 1.0f);
+                float followWeight = Mathf.Clamp(1.0f - dist / maxRadius, 0.0f, 1.0f);
                 if (forwardAsymmetry > 0.0f)
                 {
-                    float fwd = Vector3.Dot(delta.normalized, state.direction);
-                    float fwdFactor = 0.5f + 0.5f * fwd;
-                    weight *= 1.0f - (1.0f - fwdFactor) * forwardAsymmetry;
+                    float fwd = Mathf.Max(0.0f, 0.5f + 0.5f * Vector3.Dot(delta.normalized, state.direction));
+                    float fwdFactor = 1.0f - (1.0f - fwd) * forwardAsymmetry;
+                    swarmWeight *= fwdFactor;
+                    followWeight *= fwdFactor;
                 }
 
                 // TODO arbitrary blending between goal behavior and direction alignment
-                float dirGoalBlend = Mathf.SmoothStep(0.0f, 1.0f, (dist - 0.5f * minRadius)/minRadius);
+                // float dirGoalBlend = Mathf.SmoothStep(0.0f, 1.0f, dist / maxRadius);
 
-                dir += queryState.direction * weight * (1.0f - dirGoalBlend);
-                dir += delta * weight * dirGoalBlend;
+                // dir += queryState.direction * swarmWeight * (1.0f - dirGoalBlend);
+                // dir += delta * followWeight * dirGoalBlend;
+                dir += queryState.direction * swarmWeight;
+                dir += delta * followWeight;
 
                 if (dbg != null)
                 {
-                    dbg.AddSwarmPoint(queryState.position, weight);
+                    dbg.AddSwarmPoint(queryState.position, swarmWeight);
                 }
 
-                totweight += weight;
+                totweight += swarmWeight + followWeight;
             }
             if (totweight > 0.0f)
             {
