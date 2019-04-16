@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 60342f2f00b5c9d4ba4d7dbe847fbd4a, type: 3}
   m_Name: AvoidCollisionRule
-  m_EditorClassIdentifier: Assembly-CSharp:Boids:AvoidCollisionRule
+  m_EditorClassIdentifier: 
   maxRadius: 1.5
-  minRadius: 0.3
+  minRadius: 0.4
   maxIterations: 5
