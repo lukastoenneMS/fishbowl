@@ -49,27 +49,44 @@ namespace Boids
             context.Query.Radius(context.Tree, state.position, maxRadius, queryResults);
 
             Vector3 dir = state.direction;
-            float maxweight = 0.0f;
-            foreach (int idx in queryResults)
+            bool hasCorrection = false;
+            for (int iter = 0; iter < maxIterations; ++iter)
             {
-                // Skip own point
-                if (idx == boidIndex)
+                bool hasCollision = false;
+                float distance = 0.0f;
+                Vector3 gradient = Vector3.zero;
+                foreach (int idx in queryResults)
                 {
-                    Debug.Assert(context.Tree.Points[idx] == state.position);
-                    continue;
+                    // Skip own point
+                    if (idx == boidIndex)
+                    {
+                        Debug.Assert(context.Tree.Points[idx] == state.position);
+                        continue;
+                    }
+
+                    Vector3 colliderPos = context.Tree.Points[idx];
+                    Vector3 colliderDir = colliderPos - state.position;
+
+                    if (GetInsidePositiveConeDistance(dir, colliderDir, minRadius, out float coneDistance, out Vector3 coneGradient, dbg))
+                    {
+                        // TODO find useful metric for correction weight
+                        hasCollision = true;
+                        distance += coneDistance;
+                        gradient += coneGradient;
+                    }
                 }
-
-                Vector3 colliderPos = context.Tree.Points[idx];
-                Vector3 colliderDir = colliderPos - state.position;
-
-                if (GetInsidePositiveConeProjection(dir, colliderDir, minRadius, out Vector3 newDir, dbg))
+                if (hasCollision)
                 {
-                    dir = newDir;
-                    // TODO find useful metric for correction weight
-                    maxweight = 1.0f;
+                    hasCorrection = true;
+                    dir -= gradient * distance;
+                }
+                else
+                {
+                    break;
                 }
             }
-            if (maxweight > 0.0f)
+
+            if (hasCorrection)
             {
                 target = new BoidTarget(dir, state.velocity.magnitude);
                 priority = PriorityHigh;
@@ -84,19 +101,21 @@ namespace Boids
         }
 
         /// <summary>
-        /// Project vectors inside the positive cone onto it, leave vectors outside the cone unchanged.
+        /// Compute a distance field inside the positive cone, including gradient.
         /// </summary>
-        private static bool GetInsidePositiveConeProjection(Vector3 dir, Vector3 coneDir, float radius, out Vector3 result, BoidParticleDebug dbg)
+        private static bool GetInsidePositiveConeDistance(Vector3 dir, Vector3 coneDir, float coneRadius, out float distance, out Vector3 gradient, BoidParticleDebug dbg)
         {
-            float sqrRadius = radius * radius;
+            float sqrRadius = coneRadius * coneRadius;
             Vector3 normConeDir = coneDir.normalized;
 
-            // Distance to the closest valid point on the sphere
+            // Length to the cone side
             float sqrConeSide = coneDir.sqrMagnitude - sqrRadius;
-            // Special case: inside the sphere, move straight away from the collider
+            // Special case: inside the sphere
             if (sqrConeSide <= 0.0f)
             {
-                result = -normConeDir * (radius - coneDir.magnitude);
+                float coneDistance = coneDir.magnitude;
+                distance = 1.0f - coneDistance / coneRadius;
+                gradient = normConeDir;
                 return true;
             }
 
@@ -105,7 +124,8 @@ namespace Boids
             // Negative cone case, ignore
             if (coneDot <= 0.0f)
             {
-                result = dir;
+                distance = 0.0f;
+                gradient = Vector3.zero;
                 return false;
             }
 
@@ -115,30 +135,39 @@ namespace Boids
             Debug.Assert(Mathf.Abs(Vector3.Dot(conePart, orthoPart)) < 0.01f);
 
             float sqrOrtho = orthoPart.sqrMagnitude;
-            if (sqrOrtho > 0.0f)
+            float sqrCone = conePart.sqrMagnitude;
+            if (sqrOrtho > 0.0f && sqrCone > 0.0f)
             {
                 float sqrTanConeAngle = sqrRadius / (coneDir.sqrMagnitude - sqrRadius);
-
-                float sqrCone = conePart.sqrMagnitude;
-                float sqrScale = sqrCone / sqrOrtho * sqrTanConeAngle;
-                // scale >= 1 means the vector is outside the cone
+                float sqrOrthoNew = sqrCone * sqrTanConeAngle;
+                float sqrScale = sqrOrtho / sqrOrthoNew;
                 if (sqrScale < 1.0f)
                 {
-                    result = conePart + orthoPart * Mathf.Sqrt(sqrScale);
+                    // scale < 1: vector is inside the cone
+                    float scale = Mathf.Sqrt(sqrScale);
+                    distance = 1.0f - scale;
+                    gradient = -orthoPart.normalized;
                     if (dbg != null)
                     {
-                        dbg.AddCollisionCone(conePart, orthoPart, coneDir, radius);
+                        dbg.AddCollisionCone(dir, coneDir, coneRadius);
                     }
                     return true;
                 }
                 else
                 {
-                    result = dir;
+                    // scale >= 1: vector is outside the cone
+                    distance = 0.0f;
+                    gradient = Vector3.zero;
                     return false;
                 }
             }
-            result = dir;
-            return false;
+            else
+            {
+                /// Unlikely corner case: direction coincides exactly with cone direction, no gradient
+                distance = 1.0f;
+                gradient = Vector3.zero;
+                return false;
+            }
         }
     }
 }

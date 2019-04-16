@@ -75,28 +75,28 @@ namespace Boids
             ClearPool("Swarm");
         }
 
-        public void AddCollisionCone(Vector3 conePart, Vector3 orthoPart, Vector3 colliderDir, float radius)
+        public void AddCollisionCone(Vector3 dir, Vector3 colliderDir, float radius)
         {
             var state = particle.GetState();
-            var collisionConePart = GetOrCreatePooled("collisionConePart", PrimitiveType.Cube);
-            var collisionOrthoPart = GetOrCreatePooled("collisionOrthoPart", PrimitiveType.Cube);
-            var collisionDisk = GetOrCreatePooled("CollisionDisk", PrimitiveType.Sphere);
+            var collisionFwd = GetOrCreatePooled("CollisionFwd", PrimitiveType.Cube);
+            var collisionDir = GetOrCreatePooled("CollisionDir", PrimitiveType.Cube);
+            var collisionSphere = GetOrCreatePooled("CollisionSphere", PrimitiveType.Sphere);
 
-            SetTransformDirection(collisionConePart, state.position, conePart, 0.01f);
-            SetTransformDirection(collisionOrthoPart, state.position, orthoPart, 0.01f);
-            collisionDisk.position = state.position + colliderDir;
-            collisionDisk.localScale = Vector3.one * radius * 2.0f;
+            SetTransformDirection(collisionFwd, state.position, dir, 0.01f);
+            SetTransformDirection(collisionDir, state.position, colliderDir, 0.005f);
+            collisionSphere.position = state.position + colliderDir;
+            collisionSphere.localScale = Vector3.one * radius * 2.0f;
 
-            collisionConePart.GetComponent<Renderer>().material.color = Color.red;
-            collisionOrthoPart.GetComponent<Renderer>().material.color = Color.green;
-            collisionDisk.GetComponent<Renderer>().material.color = new Color(1.0f, 1.0f, 0.0f, 0.2f);
+            collisionFwd.GetComponent<Renderer>().material.color = Color.cyan;
+            collisionDir.GetComponent<Renderer>().sharedMaterial = (Material)Resources.Load("DebugCollision", typeof(Material));
+            collisionSphere.GetComponent<Renderer>().sharedMaterial = (Material)Resources.Load("DebugCollision", typeof(Material));
         }
 
         public void ClearCollision()
         {
-            ClearPool("collisionConePart");
-            ClearPool("collisionOrthoPart");
-            ClearPool("CollisionDisk");
+            ClearPool("CollisionFwd");
+            ClearPool("CollisionDir");
+            ClearPool("CollisionSphere");
         }
 
         private Transform GetOrCreate(string name, PrimitiveType prim)
