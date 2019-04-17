@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf58864e69a40843982c1c74f30061f, type: 3}
   m_Name: SwarmRule
   m_EditorClassIdentifier: 
-  maxRadius: 3
-  minRadius: 1
+  maxRadius: 1.2
+  minRadius: 0.2
   forwardAsymmetry: 0.806
