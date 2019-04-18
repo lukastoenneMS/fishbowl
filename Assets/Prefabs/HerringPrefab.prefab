@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3664484567491008213}
   - component: {fileID: 2686272799635647}
   - component: {fileID: 8910766252003197551}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: CenterBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 4631026158335371055}
   - component: {fileID: 1437279574158078394}
   - component: {fileID: 4148568789383168791}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: TailBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -210,7 +210,7 @@ GameObject:
   - component: {fileID: 3905843044318009765}
   - component: {fileID: 3000054000134497067}
   - component: {fileID: 898192342857817642}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: HerringPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -246,7 +246,7 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 2
   m_AngularDrag: 5
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -258,7 +258,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3713867872635992076}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: a3f70d0c39025d04381e668816037a8e, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.06
@@ -282,7 +282,7 @@ MonoBehaviour:
     MaxSpeed: 12
     MaxAcceleration: 4
     MaxAngularVelocity: 30
-    MaxAngularAcceleration: 6
+    MaxAngularAcceleration: 30
     NeighborDistance: 2.5
     SeparationDistance: 0.3
     Banking: 1
@@ -356,7 +356,7 @@ GameObject:
   - component: {fileID: 5067277016455749556}
   - component: {fileID: 5573798410329555928}
   - component: {fileID: 3168334250047549634}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: HeadBody
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -418,6 +418,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Herring
       objectReference: {fileID: 0}
+    - target: {fileID: 100012, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100010, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 400012, guid: 644ec01637253894e956aff0e1194894, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -478,6 +490,26 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: fd2f2590bf7b86e4487e7db1d000925d, type: 2}
+    - target: {fileID: 100014, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100002, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100004, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100006, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 100008, guid: 644ec01637253894e956aff0e1194894, type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 644ec01637253894e956aff0e1194894, type: 3}
 --- !u!4 &5612938273525041178 stripped

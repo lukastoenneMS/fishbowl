@@ -34,7 +34,7 @@ namespace Boids
             boid.GetDebug(out var dbg);
             if (dbg != null)
             {
-                dbg.ClearCollision();
+                dbg.ClearBoidCollision();
             }
 
             float deltaRadius = maxRadius - minRadius;
@@ -62,14 +62,13 @@ namespace Boids
                     // Skip own point
                     if (idx == boidIndex)
                     {
-                        Debug.Assert(context.Tree.Points[idx] == state.position);
                         continue;
                     }
 
                     Vector3 colliderPos = context.Tree.Points[idx];
                     Vector3 colliderDir = colliderPos - state.position;
 
-                    if (GetInsidePositiveConeDistance(dir, colliderDir, minRadius, out float coneDistance, out Vector3 coneGradient, dbg))
+                    if (BoidUtils.GetInsidePositiveConeDistance(dir, colliderDir, minRadius, out float coneDistance, out Vector3 coneGradient))
                     {
                         // TODO find useful metric for correction weight
                         ++numCollisions;
@@ -100,76 +99,6 @@ namespace Boids
             {
                 target = null;
                 priority = PriorityNone;
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Compute a distance field inside the positive cone, including gradient.
-        /// </summary>
-        private static bool GetInsidePositiveConeDistance(Vector3 dir, Vector3 coneDir, float coneRadius, out float distance, out Vector3 gradient, BoidParticleDebug dbg)
-        {
-            float sqrRadius = coneRadius * coneRadius;
-            Vector3 normConeDir = coneDir.normalized;
-
-            // Length to the cone side
-            float sqrConeSide = coneDir.sqrMagnitude - sqrRadius;
-            // Special case: inside the sphere
-            if (sqrConeSide <= 0.0f)
-            {
-                float coneDistance = coneDir.magnitude;
-                distance = 1.0f - coneDistance / coneRadius;
-                gradient = normConeDir;
-                return true;
-            }
-
-            // Length of dir vector in direction of the cone
-            float coneDot = Vector3.Dot(dir, normConeDir);
-            // Negative cone case, ignore
-            if (coneDot <= 0.0f)
-            {
-                distance = 0.0f;
-                gradient = Vector3.zero;
-                return false;
-            }
-
-            // Split
-            Vector3 conePart = coneDot * normConeDir;
-            Vector3 orthoPart = dir - conePart;
-            Debug.Assert(Mathf.Abs(Vector3.Dot(conePart, orthoPart)) < 0.01f);
-
-            float sqrOrtho = orthoPart.sqrMagnitude;
-            float sqrCone = conePart.sqrMagnitude;
-            if (sqrOrtho > 0.0f && sqrCone > 0.0f)
-            {
-                float sqrTanConeAngle = sqrRadius / (coneDir.sqrMagnitude - sqrRadius);
-                float sqrOrthoNew = sqrCone * sqrTanConeAngle;
-                float sqrScale = sqrOrtho / sqrOrthoNew;
-                if (sqrScale < 1.0f)
-                {
-                    // scale < 1: vector is inside the cone
-                    float scale = Mathf.Sqrt(sqrScale);
-                    distance = 1.0f - scale;
-                    gradient = -orthoPart.normalized;
-                    if (dbg != null)
-                    {
-                        dbg.AddCollisionCone(dir, coneDir, coneRadius);
-                    }
-                    return true;
-                }
-                else
-                {
-                    // scale >= 1: vector is outside the cone
-                    distance = 0.0f;
-                    gradient = Vector3.zero;
-                    return false;
-                }
-            }
-            else
-            {
-                /// Unlikely corner case: direction coincides exactly with cone direction, no gradient
-                distance = 1.0f;
-                gradient = Vector3.zero;
                 return false;
             }
         }
