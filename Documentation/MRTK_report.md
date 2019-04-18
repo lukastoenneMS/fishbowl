@@ -46,4 +46,10 @@ Cached boid data for performance reasons. The context is provided during rule ev
 
 1. Feature: Grabbing fish out of the water
     - Decided to not look at demo files this time, but try and follow the docs to see if they are sufficient.
-    
+    - Started with [ManipulationHandler](https://github.com/Microsoft/MixedRealityToolkit-Unity/blob/mrtk_release/Documentation/README_ManipulationHandler.md) as that sounds like what i want to do.
+    - The fish prefab already has a capsule collider, but from prior experience i am expecting that a secondary collider will be needed for interaction. The physics collider matches the visual bounds of the object quite closely and may be too small to reliably grab, especially for fish that are moving. I decide to try the existing collider first and add a second one later if needed.
+    - The fish objects should not be scalable, so i limit the ManipulationHandler to "Move Rotate".
+        
+        **Why is there no option for "Move" only?** (I don't need it here, but seems like an oversight)
+    - Quick test with simulated hands in the editor and far interaction seems to work nicely.
+    - I add a "Near Interaction Grabbable" as mentioned in the docs and test with hand simulation, also works as expected.
