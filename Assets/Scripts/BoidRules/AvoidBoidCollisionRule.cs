@@ -9,8 +9,8 @@ using UnityEngine.Events;
 
 namespace Boids
 {
-    [CreateAssetMenu(fileName = "AvoidCollisionRule", menuName = "Boids/AvoidCollisionRule", order = 1)]
-    public class AvoidCollisionRule : BoidRule
+    [CreateAssetMenu(fileName = "AvoidBoidCollisionRule", menuName = "Boids/AvoidBoidCollisionRule", order = 1)]
+    public class AvoidBoidCollisionRule : BoidRule
     {
         /// <summary>
         /// Maximum collision detection distance.
