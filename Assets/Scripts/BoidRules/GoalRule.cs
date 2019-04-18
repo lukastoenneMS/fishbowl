@@ -8,10 +8,13 @@ namespace Boids
     [CreateAssetMenu(fileName = "GoalRule", menuName = "Boids/GoalRule", order = 1)]
     public class GoalRule : BoidRule
     {
-        public float minDistance = 1.0f;
-        public float maxDistance = 3.0f;
         public GameObject goal = null;
         public Vector3 goalVector = Vector3.zero;
+
+        /// <summary>
+        /// Distance to keep from the goal position.
+        /// </summary>
+        public float Distance = 1.0f;
 
         public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
@@ -22,27 +25,11 @@ namespace Boids
             }
 
             Vector3 delta = currentGoal - state.position;
-            float distance = delta.magnitude;
-            float blendRange = (maxDistance - minDistance) * 0.25f;
-            float mid = (minDistance + maxDistance) * 0.5f;
-            if (distance < minDistance + blendRange)
-            {
-                target = new BoidTarget(-delta.normalized, boid.Settings.MaxSpeed);
-                float weight = Mathf.Clamp((mid - distance) / blendRange, 0.0f, 1.0f);
-                priority = PriorityHigh * weight;
-                return true;
-            }
-            else if (distance > maxDistance - blendRange)
-            {
-                target = new BoidTarget(delta.normalized, boid.Settings.MaxSpeed);
-                float weight = Mathf.Clamp((distance - mid) / blendRange, 0.0f, 1.0f);
-                priority = PriorityHigh * weight;
-                return true;
-            }
+            Vector3 direction = (delta - delta.normalized * Distance).normalized;
 
-            target = null;
-            priority = PriorityNone;
-            return false;
+            target = new BoidTarget(direction, boid.Settings.MinSpeed);
+            priority = PriorityMedium;
+            return true;
         }
     }
 }
