@@ -17,7 +17,16 @@ namespace Boids
         public float MaxAcceleration = 0.5f;
         public float MaxAngularVelocity = 90.0f;
         public float MaxAngularAcceleration = 10.0f;
-        public float PersonalSpace = 1.0f;
+
+        /// <summary>
+        /// Consider boids as neighbors when they are closer.
+        /// </summary>
+        public float NeighborDistance = 1.0f;
+
+        /// <summary>
+        /// Distance that should be kept between boids.
+        /// </summary>
+        public float SeparationDistance = 0.5f;
 
         public float Banking = 1.0f;
         public float Pitch = 1.0f;

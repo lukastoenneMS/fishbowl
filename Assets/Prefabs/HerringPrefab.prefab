@@ -281,7 +281,8 @@ MonoBehaviour:
     MaxAcceleration: 4
     MaxAngularVelocity: 30
     MaxAngularAcceleration: 6
-    PersonalSpace: 1
+    NeighborDistance: 2.5
+    SeparationDistance: 0.3
     Banking: 1
     Pitch: 30
   CurrentRuleIndex: -1
