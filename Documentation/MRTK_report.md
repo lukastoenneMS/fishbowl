@@ -34,3 +34,16 @@ Cached boid data for performance reasons. The context is provided during rule ev
 
 ## MRTK features
 
+## MRTK notes
+
+1. Importing the MRTK package and configuring the scene went smoothly. This may be simply because i have done it many times and am used to it.
+
+1. When running the app on a Hololens it initially appeared as a slate, rather than a fully fledged MR app. Solution: Build Settings > Player Settings > XR Settings > Tick "Virtual Reality Supported". Is this mentioned in docs?
+
+1. Tried enabling "WSA Holographic Remoting Supported" in Player Settings just because it sounds nice, but that is missing some dlls and doesn't work out of the box.
+
+1. Feature: Fish following the player camera. This was quite simple, but also because i knew about CameraCache beforehand. Rather than using a Camera property, the goal object is set at runtime by looking up CameraCache.Main.
+
+1. Feature: Grabbing fish out of the water
+    - Decided to not look at demo files this time, but try and follow the docs to see if they are sufficient.
+    
