@@ -9,26 +9,17 @@ using UnityEngine.Assertions;
 
 namespace Boids
 {
-    public class BoidDebug
+    public static class BoidDebug
     {
-        private bool enableTarget = false;
-        private bool enablePhysics = false;
-        private bool enableCollision = true;
-        private bool enableSwarm = false;
-        private bool enableBoidCollision = false;
+        private static bool enableTarget = false;
+        private static bool enablePhysics = false;
+        private static bool enableCollision = true;
+        private static bool enableSwarm = false;
+        private static bool enableBoidCollision = false;
 
-        private Transform debugObjects
-        {
-            get
-            {
-                if (!debugObjects)
-                {
-                    debugObjects = new GameObject("Debugging");
-                }
-            }
-        }
+        private static Transform debugObjects = null;
 
-        public void SetTarget(BoidParticle particle, BoidTarget target)
+        public static void SetTarget(BoidParticle particle, BoidTarget target)
         {
             if (!enableTarget || !particle.EnableDebugObjects)
             {
@@ -36,8 +27,8 @@ namespace Boids
             }
 
             BoidState state = particle.GetState();
-            var debugTarget = GetOrCreate("Target", PrimitiveType.Cube);
-            var debugTargetDirection = GetOrCreate("TargetDirection", PrimitiveType.Cube);
+            var debugTarget = GetOrCreatePooled("Target", PrimitiveType.Cube);
+            var debugTargetDirection = GetOrCreatePooled("TargetDirection", PrimitiveType.Cube);
 
             if (target != null)
             {
@@ -58,7 +49,7 @@ namespace Boids
             }
         }
 
-        public void SetPhysics(BoidParticle particle)
+        public static void SetPhysics(BoidParticle particle)
         {
             if (!enablePhysics || !particle.EnableDebugObjects)
             {
@@ -77,7 +68,7 @@ namespace Boids
             // }
         }
 
-        public void AddSwarmPoint(BoidParticle particle, Vector3 point, float weight)
+        public static void AddSwarmPoint(BoidParticle particle, Vector3 point, float weight)
         {
             if (!enableSwarm || !particle.EnableDebugObjects)
             {
@@ -93,12 +84,7 @@ namespace Boids
             swarm.GetComponent<Renderer>().material.color = color;
         }
 
-        public void ClearSwarm()
-        {
-            ClearPool("Swarm");
-        }
-
-        public void AddCollisionPoint(BoidParticle particle, Vector3 hitPoint, Vector3 hitNormal)
+        public static void AddCollisionPoint(BoidParticle particle, Vector3 hitPoint, Vector3 hitNormal)
         {
             if (!enableCollision || !particle.EnableDebugObjects)
             {
@@ -116,13 +102,7 @@ namespace Boids
             collisionNormal.GetComponent<Renderer>().material.color = Color.yellow;
         }
 
-        public void ClearCollision()
-        {
-            ClearPool("CollisionPoint");
-            ClearPool("CollisionNormal");
-        }
-
-        public void AddBoidCollisionCone(BoidParticle particle, Vector3 dir, Vector3 colliderDir, float radius)
+        public static void AddBoidCollisionCone(BoidParticle particle, Vector3 dir, Vector3 colliderDir, float radius)
         {
             if (!enableBoidCollision || !particle.EnableDebugObjects)
             {
@@ -144,25 +124,22 @@ namespace Boids
             collisionSphere.GetComponent<Renderer>().sharedMaterial = (Material)Resources.Load("DebugCollision", typeof(Material));
         }
 
-        public void ClearBoidCollision()
+        public static void ClearAll()
         {
-            ClearPool("CollisionFwd");
-            ClearPool("CollisionDir");
-            ClearPool("CollisionSphere");
-        }
-
-        private Transform GetOrCreate(string name, PrimitiveType prim)
-        {
-            var dbg = debugObjects.Find(name);
-            if (!dbg)
+            if (debugObjects)
             {
-                dbg = CreateDebugPrimitive(name, prim);
+                for (int i = 0; i < debugObjects.childCount; ++i)
+                {
+                    var child = debugObjects.GetChild(i);
+                    child.gameObject.SetActive(false);
+                }
             }
-            return dbg;
         }
 
-        private Transform GetOrCreatePooled(string name, PrimitiveType prim)
+        private static Transform GetOrCreatePooled(string name, PrimitiveType prim)
         {
+            EnsureDebugObjects();
+
             for (int i = 0; i < debugObjects.childCount; ++i)
             {
                 var child = debugObjects.GetChild(i);
@@ -176,14 +153,17 @@ namespace Boids
             return CreateDebugPrimitive(name, prim);
         }
 
-        private void ClearPool(string name)
+        private static void ClearPool(string name)
         {
-            for (int i = 0; i < debugObjects.childCount; ++i)
+            if (debugObjects)
             {
-                var child = debugObjects.GetChild(i);
-                if (child.name == name)
+                for (int i = 0; i < debugObjects.childCount; ++i)
                 {
-                    child.gameObject.SetActive(false);
+                    var child = debugObjects.GetChild(i);
+                    if (child.name == name)
+                    {
+                        child.gameObject.SetActive(false);
+                    }
                 }
             }
         }
@@ -203,7 +183,7 @@ namespace Boids
             dbg.localScale = new Vector3(size, size, direction.magnitude);
         }
 
-        private Transform CreateDebugPrimitive(string name, PrimitiveType prim)
+        private static Transform CreateDebugPrimitive(string name, PrimitiveType prim)
         {
             var dbg = GameObject.CreatePrimitive(prim).transform;
             // We don't want a collider on debug objects
@@ -212,6 +192,15 @@ namespace Boids
             dbg.parent = debugObjects;
             dbg.localScale = new Vector3(0.02f, 0.02f, 0.02f);
             return dbg;
+        }
+
+        private static Transform EnsureDebugObjects()
+        {
+            if (!debugObjects)
+            {
+                debugObjects = new GameObject("Debugging").transform;
+            }
+            return debugObjects;
         }
     }
 }

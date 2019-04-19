@@ -32,12 +32,6 @@ namespace Boids
 
         public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
-            boid.GetDebug(out var dbg);
-            if (dbg != null)
-            {
-                dbg.ClearSwarm();
-            }
-
             float deltaRadius = maxRadius - minRadius;
             if (deltaRadius <= 0.0f)
             {

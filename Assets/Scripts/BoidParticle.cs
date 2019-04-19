@@ -52,16 +52,6 @@ namespace Boids
 
         public bool EnableDebugObjects = false;
 
-        private GameObject debugObjects = null;
-
-        void OnDestroy()
-        {
-            if (debugObjects)
-            {
-                Destroy(debugObjects);
-            }
-        }
-
         public BoidState GetState()
         {
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
@@ -82,8 +72,6 @@ namespace Boids
             float dtime = Time.fixedDeltaTime;
             Quaternion uprightRotation = Quaternion.LookRotation(state.direction, Vector3.up);
             Quaternion stateRotation = uprightRotation * Quaternion.Euler(0.0f, 0.0f, state.roll);
-
-            GetDebug(out BoidParticleDebug dbg);
 
             Vector3 predictedPosition = state.position + dtime * state.velocity;
 
@@ -112,10 +100,6 @@ namespace Boids
             Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
             deltaAngle = (deltaAngle + 180.0f) % 360.0f - 180.0f;
-            if (dbg != null)
-            {
-                Debug.Log($"{deltaAngle}");
-            }
             deltaAngle = Mathf.Clamp(deltaAngle, -settings.MaxAngularAcceleration * dtime, settings.MaxAngularAcceleration * dtime);
 
             Vector3 targetTorque = Vector3.zero;

@@ -17,11 +17,6 @@ namespace Boids
         public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
             BoidSettings settings = boid.Settings;
-            boid.GetDebug(out var dbg);
-            if (dbg != null)
-            {
-                dbg.ClearSwarm();
-            }
 
             queryResults.Clear();
             context.Query.Radius(context.Tree, state.position, settings.NeighborDistance, queryResults);

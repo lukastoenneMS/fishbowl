@@ -32,11 +32,6 @@ namespace Boids
         public override bool Evaluate(BoidContext context, BoidParticle boid, int boidIndex, BoidState state, out BoidTarget target, out float priority)
         {
             BoidSettings settings = boid.Settings;
-            boid.GetDebug(out var dbg);
-            if (dbg != null)
-            {
-                dbg.ClearCollision();
-            }
 
 #if false
             int numOverlaps = Physics.OverlapSphereNonAlloc(state.position, DetectionDistance, colliders, Layers, QueryTriggerInteraction.Ignore);
@@ -121,10 +116,7 @@ namespace Boids
                         if (sqrDist > 0.0f)
                         {
                             float weight = settings.SeparationDistance / sqrDist;
-                            if (dbg != null)
-                            {
-                                dbg.AddCollisionPoint(hit.point, delta * weight);
-                            }
+                            BoidDebug.AddCollisionPoint(boid, hit.point, delta * weight);
 
                             steer += delta * weight;
                             ++count;

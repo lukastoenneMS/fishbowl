@@ -58,6 +58,7 @@ namespace Boids
 
         void FixedUpdate()
         {
+            BoidDebug.ClearAll();
             ApplyRules();
         }
 
@@ -83,7 +84,6 @@ namespace Boids
             for (int boidIndex = 0; boidIndex < boids.Count; ++boidIndex)
             {
                 BoidParticle boid = boids[boidIndex];
-                boid.GetDebug(out BoidParticleDebug dbg);
 
                 BoidState state = context.States[boidIndex];
 
@@ -107,10 +107,7 @@ namespace Boids
 
                 boid.ApplyPhysics(state, newTarget);
 
-                if (dbg != null)
-                {
-                    dbg.SetTarget(newTarget);
-                }
+                BoidDebug.SetTarget(boid, newTarget);
             }
 
             context.Cleanup();
