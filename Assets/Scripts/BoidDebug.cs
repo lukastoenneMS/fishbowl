@@ -13,7 +13,7 @@ namespace Boids
     {
         private static bool enableTarget = false;
         private static bool enablePhysics = false;
-        private static bool enableCollision = true;
+        private static bool enableCollision = false;
         private static bool enableSwarm = false;
         private static bool enableBoidCollision = false;
 
@@ -49,7 +49,7 @@ namespace Boids
             }
         }
 
-        public static void SetPhysics(BoidParticle particle)
+        public static void SetPhysics(BoidParticle particle, Vector3 force, Vector3 torque)
         {
             if (!enablePhysics || !particle.EnableDebugObjects)
             {
@@ -57,6 +57,14 @@ namespace Boids
             }
 
             var state = particle.GetState();
+            var forceOb = GetOrCreatePooled("Force", PrimitiveType.Cube);
+            var torqueOb = GetOrCreatePooled("Torque", PrimitiveType.Cube);
+
+            SetTransformDirection(forceOb, state.position, force, 0.01f);
+            SetTransformDirection(torqueOb, state.position, torque, 0.01f);
+
+            forceOb.GetComponent<Renderer>().material.color = Color.red;
+            torqueOb.GetComponent<Renderer>().material.color = Color.blue;
 
             // {
             //     var dbgRoll = GetOrCreate("Roll", PrimitiveType.Cube);
@@ -122,6 +130,24 @@ namespace Boids
             collisionFwd.GetComponent<Renderer>().material.color = Color.cyan;
             collisionDir.GetComponent<Renderer>().sharedMaterial = (Material)Resources.Load("DebugCollision", typeof(Material));
             collisionSphere.GetComponent<Renderer>().sharedMaterial = (Material)Resources.Load("DebugCollision", typeof(Material));
+        }
+
+        public static void AddCustomVector(Vector3 from, Vector3 to, Color color)
+        {
+            var ob = GetOrCreatePooled("CustomVector", PrimitiveType.Cube);
+
+            SetTransformVector(ob, from, to, 0.01f);
+
+            ob.GetComponent<Renderer>().material.color = color;
+        }
+
+        public static void AddCustomDirection(Vector3 origin, Vector3 direction, Color color)
+        {
+            var ob = GetOrCreatePooled("CustomDirection", PrimitiveType.Cube);
+
+            SetTransformDirection(ob, origin, direction, 0.01f);
+
+            ob.GetComponent<Renderer>().material.color = color;
         }
 
         public static void ClearAll()

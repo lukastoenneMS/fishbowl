@@ -100,6 +100,17 @@ namespace Boids
             Quaternion deltaRotation = targetRotation * Quaternion.Inverse(stateRotation);
             deltaRotation.ToAngleAxis(out float deltaAngle, out Vector3 deltaAxis);
             deltaAngle = (deltaAngle + 180.0f) % 360.0f - 180.0f;
+            if (EnableDebugObjects)
+            {
+                // var q = Quaternion.AngleAxis(deltaAngle, deltaAxis);
+                var q = targetRotation;
+                BoidDebug.AddCustomDirection(state.position, new Vector3(1, 0, 0), Color.red);
+                BoidDebug.AddCustomDirection(state.position, new Vector3(0, 1, 0), Color.green);
+                BoidDebug.AddCustomDirection(state.position, new Vector3(0, 0, 1), Color.blue);
+                BoidDebug.AddCustomDirection(state.position, q * (new Vector3(1, 0, 0)), new Color(1, 0.8f, 0.8f));
+                BoidDebug.AddCustomDirection(state.position, q * (new Vector3(0, 1, 0)), new Color(0.8f, 1, 0.8f));
+                BoidDebug.AddCustomDirection(state.position, q * (new Vector3(0, 0, 1)), new Color(0.8f, 0.8f, 1));
+            }
             deltaAngle = Mathf.Clamp(deltaAngle, -settings.MaxAngularAcceleration * dtime, settings.MaxAngularAcceleration * dtime);
 
             Vector3 targetTorque = Vector3.zero;
@@ -116,6 +127,7 @@ namespace Boids
             {
                 rb.AddForce(targetForce, ForceMode.VelocityChange);
                 rb.AddTorque(targetTorque, ForceMode.VelocityChange);
+                BoidDebug.SetPhysics(this, targetForce, targetTorque);
             }
         }
 
