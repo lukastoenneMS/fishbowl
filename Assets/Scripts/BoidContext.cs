@@ -9,6 +9,23 @@ using UnityEngine.Events;
 
 namespace Boids
 {
+    public class BoidState
+    {
+        public int instanceID;
+
+        public Vector3 position;
+        public Vector3 velocity;
+        public Vector3 direction;
+        public float roll;
+        public Vector3 angularVelocity;
+
+        public BoidState(BoidParticle boid)
+        {
+            instanceID = boid.GetInstanceID();
+            boid.GetPhysicsState(this);
+        }
+    }
+
     public class BoidContext
     {
         private const int maxPointsPerLeafNode = 32;
@@ -18,8 +35,11 @@ namespace Boids
         private KDQuery query;
         public KDQuery Query => query;
 
-        private readonly List<BoidState> states = new List<BoidState>();
-        public List<BoidState> States => states;
+        private BoidState[] states = new BoidState[0];
+        public BoidState[] States => states;
+
+        private BoidParticle[] boids = new BoidParticle[0];
+        public BoidParticle[] Boids => boids;
 
         public BoidContext()
         {
@@ -28,18 +48,49 @@ namespace Boids
             query = new KDQuery();
         }
 
-        public void Prepare(List<BoidParticle> boids)
+        public void UpdateBoidParticles(BoidParticle[] newBoids)
         {
-            states.Capacity = boids.Count;
-            states.Clear();
-            tree.SetCount(boids.Count);
+            boids = newBoids;
 
-            for (int i = 0; i < boids.Count; ++i)
+            var compareInstanceIDs = new Comparison<BoidParticle>((a, b) => a.GetInstanceID().CompareTo(b.GetInstanceID()));
+            Array.Sort(boids, compareInstanceIDs);
+
+            BoidState[] oldStates = states;
+            states = new BoidState[boids.Length];
+
+            int oldIdx = 0;
+            for (int i = 0; i < boids.Length; ++i)
             {
-                BoidState state = new BoidState();
-                states.Add(state);
-                boids[i].GetPhysicsState(state);
-                tree.Points[i] = state.position;
+                BoidParticle boid = boids[i];
+                int instanceID = boid.GetInstanceID();
+
+                // Discard states without boid particle
+                while (oldIdx < oldStates.Length && instanceID > oldStates[oldIdx].instanceID)
+                {
+                    ++oldIdx;
+                }
+
+                if (oldIdx < oldStates.Length && instanceID == oldStates[oldIdx].instanceID)
+                {
+                    // Copy existing states for matching particles
+                    states[i] = oldStates[oldIdx];
+                }
+                else
+                {
+                    // Add new states for boid particles without state
+                    states[i] = new BoidState(boid);
+                }
+            }
+        }
+
+        public void Prepare()
+        {
+            tree.SetCount(boids.Length);
+
+            for (int i = 0; i < states.Length; ++i)
+            {
+                boids[i].GetPhysicsState(states[i]);
+                tree.Points[i] = states[i].position;
             }
             tree.Rebuild();
         }

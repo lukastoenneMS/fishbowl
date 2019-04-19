@@ -19,7 +19,6 @@ namespace Boids
         /// Priority offset for the current rule to prevent immediate switching
         public float CurrentRuleBias = 0.0f;
 
-        private readonly List<BoidParticle> boids = new List<BoidParticle>();
         private readonly List<BoidTarget> ruleTargets = new List<BoidTarget>();
         private readonly List<float> rulePriorities = new List<float>();
 
@@ -29,7 +28,7 @@ namespace Boids
         {
             context = new BoidContext();
 
-            GetComponentsInChildren<BoidParticle>(boids);
+            context.UpdateBoidParticles(GetComponentsInChildren<BoidParticle>());
 
             foreach (BoidRule rule in rules)
             {
@@ -53,7 +52,7 @@ namespace Boids
 
         public void OnTransformChildrenChanged()
         {
-            GetComponentsInChildren<BoidParticle>(boids);
+            context.UpdateBoidParticles(GetComponentsInChildren<BoidParticle>());
         }
 
         void FixedUpdate()
@@ -64,9 +63,9 @@ namespace Boids
 
         private void ApplyRules()
         {
-            int numBoids = boids.Count;
+            int numBoids = context.Boids.Length;
 
-            context.Prepare(boids);
+            context.Prepare();
 
             ruleTargets.Clear();
             rulePriorities.Clear();
@@ -82,9 +81,9 @@ namespace Boids
                 rulePriorities.Add(-1.0f);
             }
 
-            for (int boidIndex = 0; boidIndex < boids.Count; ++boidIndex)
+            for (int boidIndex = 0; boidIndex < context.Boids.Length; ++boidIndex)
             {
-                BoidParticle boid = boids[boidIndex];
+                BoidParticle boid = context.Boids[boidIndex];
 
                 BoidState state = context.States[boidIndex];
 

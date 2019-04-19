@@ -33,15 +33,6 @@ namespace Boids
         public float Pitch = 1.0f;
     }
 
-    public class BoidState
-    {
-        public Vector3 position;
-        public Vector3 velocity;
-        public Vector3 direction;
-        public float roll;
-        public Vector3 angularVelocity;
-    }
-
     [System.Serializable]
     public class BoidParticle : MonoBehaviour
     {
