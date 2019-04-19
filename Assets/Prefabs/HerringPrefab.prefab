@@ -281,6 +281,7 @@ MonoBehaviour:
     MinSpeed: 0.5
     MaxSpeed: 12
     MaxAcceleration: 4
+    MaxBackwardAcceleration: 1
     MaxAngularVelocity: 30
     MaxAngularAcceleration: 180
     NeighborDistance: 2.5

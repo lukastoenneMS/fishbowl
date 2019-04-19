@@ -139,6 +139,7 @@ namespace Boids
                 if (sqrDist > 0.0f)
                 {
                     float weight = boid.Settings.SeparationDistance / sqrDist;
+                    // steer = delta.normalized;
                     steer = Vector3.ProjectOnPlane(delta, state.direction).normalized;
                     if (steer == Vector3.zero)
                     {
