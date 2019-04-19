@@ -67,6 +67,7 @@ namespace Boids
             int numBoids = boids.Count;
 
             context.Prepare(boids);
+
             ruleTargets.Clear();
             rulePriorities.Clear();
             ruleTargets.Capacity = rules.Count;
@@ -107,7 +108,7 @@ namespace Boids
 
                 boid.ApplyPhysics(state, newTarget);
 
-                BoidDebug.SetTarget(boid, newTarget);
+                BoidDebug.SetTarget(boid, state, newTarget);
             }
 
             context.Cleanup();

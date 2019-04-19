@@ -53,19 +53,16 @@ namespace Boids
 
         public bool EnableDebugObjects = false;
 
-        public BoidState GetState()
+        public void GetPhysicsState(BoidState state)
         {
             Rigidbody rb = gameObject.GetComponent<Rigidbody>();
             Assert.IsNotNull(rb);
 
-            BoidState state = new BoidState();
             state.position = rb.position;
             state.velocity = rb.velocity;
             state.direction = rb.transform.forward.normalized;
             state.roll = (rb.rotation.eulerAngles.z + 180.0f) % 360.0f - 180.0f;
             state.angularVelocity = rb.angularVelocity;
-
-            return state;
         }
 
         public void ApplyPhysics(BoidState state, BoidTarget target)
@@ -117,7 +114,7 @@ namespace Boids
             {
                 rb.AddForce(targetForce, ForceMode.VelocityChange);
                 rb.AddTorque(targetTorque, ForceMode.VelocityChange);
-                BoidDebug.SetPhysics(this, targetForce, targetTorque);
+                BoidDebug.SetPhysics(this, state, targetForce, targetTorque);
             }
         }
 

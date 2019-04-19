@@ -19,14 +19,13 @@ namespace Boids
 
         private static Transform debugObjects = null;
 
-        public static void SetTarget(BoidParticle particle, BoidTarget target)
+        public static void SetTarget(BoidParticle particle, BoidState state, BoidTarget target)
         {
             if (!enableTarget || !particle.EnableDebugObjects)
             {
                 return;
             }
 
-            BoidState state = particle.GetState();
             var debugTarget = GetOrCreatePooled("Target", PrimitiveType.Cube);
             var debugTargetDirection = GetOrCreatePooled("TargetDirection", PrimitiveType.Cube);
 
@@ -49,14 +48,13 @@ namespace Boids
             }
         }
 
-        public static void SetPhysics(BoidParticle particle, Vector3 force, Vector3 torque)
+        public static void SetPhysics(BoidParticle particle, BoidState state, Vector3 force, Vector3 torque)
         {
             if (!enablePhysics || !particle.EnableDebugObjects)
             {
                 return;
             }
 
-            var state = particle.GetState();
             var forceOb = GetOrCreatePooled("Force", PrimitiveType.Cube);
             var torqueOb = GetOrCreatePooled("Torque", PrimitiveType.Cube);
 
@@ -76,14 +74,13 @@ namespace Boids
             // }
         }
 
-        public static void AddSwarmPoint(BoidParticle particle, Vector3 point, float weight)
+        public static void AddSwarmPoint(BoidParticle particle, BoidState state, Vector3 point, float weight)
         {
             if (!enableSwarm || !particle.EnableDebugObjects)
             {
                 return;
             }
 
-            var state = particle.GetState();
             var swarm = GetOrCreatePooled("Swarm", PrimitiveType.Cube);
 
             SetTransformVector(swarm, state.position, point, 0.01f);
@@ -92,14 +89,13 @@ namespace Boids
             swarm.GetComponent<Renderer>().material.color = color;
         }
 
-        public static void AddCollisionPoint(BoidParticle particle, Vector3 hitPoint, Vector3 hitNormal)
+        public static void AddCollisionPoint(BoidParticle particle, BoidState state, Vector3 hitPoint, Vector3 hitNormal)
         {
             if (!enableCollision || !particle.EnableDebugObjects)
             {
                 return;
             }
 
-            var state = particle.GetState();
             var collisionPoint = GetOrCreatePooled("CollisionPoint", PrimitiveType.Cube);
             var collisionNormal = GetOrCreatePooled("CollisionNormal", PrimitiveType.Cube);
 
@@ -110,14 +106,13 @@ namespace Boids
             collisionNormal.GetComponent<Renderer>().material.color = Color.yellow;
         }
 
-        public static void AddBoidCollisionCone(BoidParticle particle, Vector3 dir, Vector3 colliderDir, float radius)
+        public static void AddBoidCollisionCone(BoidParticle particle, BoidState state, Vector3 dir, Vector3 colliderDir, float radius)
         {
             if (!enableBoidCollision || !particle.EnableDebugObjects)
             {
                 return;
             }
 
-            var state = particle.GetState();
             var collisionFwd = GetOrCreatePooled("CollisionFwd", PrimitiveType.Cube);
             var collisionDir = GetOrCreatePooled("CollisionDir", PrimitiveType.Cube);
             var collisionSphere = GetOrCreatePooled("CollisionSphere", PrimitiveType.Sphere);
