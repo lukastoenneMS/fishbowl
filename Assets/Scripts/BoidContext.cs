@@ -19,6 +19,7 @@ namespace Boids
         public float roll;
         public Vector3 angularVelocity;
 
+        public bool allowRaycast;
         public RaycastHit hitInfo;
 
         public BoidState(BoidParticle boid)
@@ -87,14 +88,29 @@ namespace Boids
 
         public void Prepare()
         {
-            tree.SetCount(boids.Length);
+            int numBoids = boids.Length;
 
-            for (int i = 0; i < states.Length; ++i)
+            tree.SetCount(numBoids);
+            for (int i = 0; i < numBoids; ++i)
             {
                 boids[i].GetPhysicsState(states[i]);
                 tree.Points[i] = states[i].position;
             }
             tree.Rebuild();
+
+            // Enable raycast based on priority queue and budget
+            for (int i = 0; i < numBoids; ++i)
+            {
+                states[i].allowRaycast = false;
+            }
+            // TODO implement priority queue
+            int raycastBudget = 10;
+            System.Random rand = new System.Random();
+            for (int i = 0; i < raycastBudget; ++i)
+            {
+                int r = rand.Next() % numBoids;
+                states[r].allowRaycast = true;
+            }
         }
 
         public void Cleanup()
@@ -103,12 +119,20 @@ namespace Boids
 
         public bool RequestRayCast(BoidState state, Vector3 origin, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
         {
-            return Physics.Raycast(origin, direction, out state.hitInfo, maxDistance, layerMask, queryTriggerInteraction);
+            if (state.allowRaycast)
+            {
+                Physics.Raycast(origin, direction, out state.hitInfo, maxDistance, layerMask, queryTriggerInteraction);
+            }
+            return state.hitInfo.collider != null;
         }
 
         public bool RequestSphereCast(BoidState state, Vector3 origin, float radius, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
         {
-            return Physics.SphereCast(origin, radius, direction, out state.hitInfo, maxDistance, layerMask, queryTriggerInteraction);
+            if (state.allowRaycast)
+            {
+                Physics.SphereCast(origin, radius, direction, out state.hitInfo, maxDistance, layerMask, queryTriggerInteraction);
+            }
+            return state.hitInfo.collider != null;
         }
     }
 }
