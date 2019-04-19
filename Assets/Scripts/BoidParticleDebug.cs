@@ -9,7 +9,7 @@ using UnityEngine.Assertions;
 
 namespace Boids
 {
-    public class BoidParticleDebug
+    public class BoidDebug
     {
         private bool enableTarget = false;
         private bool enablePhysics = false;
@@ -17,23 +17,25 @@ namespace Boids
         private bool enableSwarm = false;
         private bool enableBoidCollision = false;
 
-        private BoidParticle particle = null;
-        private Transform debugObjects = null;
-
-        public BoidParticleDebug(BoidParticle particle, Transform debugObjects)
+        private Transform debugObjects
         {
-            this.particle = particle;
-            this.debugObjects = debugObjects;
+            get
+            {
+                if (!debugObjects)
+                {
+                    debugObjects = new GameObject("Debugging");
+                }
+            }
         }
 
-        public void SetTarget(BoidTarget target)
+        public void SetTarget(BoidParticle particle, BoidTarget target)
         {
-            if (!enableTarget)
+            if (!enableTarget || !particle.EnableDebugObjects)
             {
                 return;
             }
 
-            var state = particle.GetState();
+            BoidState state = particle.GetState();
             var debugTarget = GetOrCreate("Target", PrimitiveType.Cube);
             var debugTargetDirection = GetOrCreate("TargetDirection", PrimitiveType.Cube);
 
@@ -56,9 +58,9 @@ namespace Boids
             }
         }
 
-        public void SetPhysics()
+        public void SetPhysics(BoidParticle particle)
         {
-            if (!enablePhysics)
+            if (!enablePhysics || !particle.EnableDebugObjects)
             {
                 return;
             }
@@ -75,9 +77,9 @@ namespace Boids
             // }
         }
 
-        public void AddSwarmPoint(Vector3 point, float weight)
+        public void AddSwarmPoint(BoidParticle particle, Vector3 point, float weight)
         {
-            if (!enableSwarm)
+            if (!enableSwarm || !particle.EnableDebugObjects)
             {
                 return;
             }
@@ -96,9 +98,9 @@ namespace Boids
             ClearPool("Swarm");
         }
 
-        public void AddCollisionPoint(Vector3 hitPoint, Vector3 hitNormal)
+        public void AddCollisionPoint(BoidParticle particle, Vector3 hitPoint, Vector3 hitNormal)
         {
-            if (!enableCollision)
+            if (!enableCollision || !particle.EnableDebugObjects)
             {
                 return;
             }
@@ -120,9 +122,9 @@ namespace Boids
             ClearPool("CollisionNormal");
         }
 
-        public void AddBoidCollisionCone(Vector3 dir, Vector3 colliderDir, float radius)
+        public void AddBoidCollisionCone(BoidParticle particle, Vector3 dir, Vector3 colliderDir, float radius)
         {
-            if (!enableBoidCollision)
+            if (!enableBoidCollision || !particle.EnableDebugObjects)
             {
                 return;
             }

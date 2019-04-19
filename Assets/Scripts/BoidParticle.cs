@@ -150,30 +150,6 @@ namespace Boids
             return velocityChange * state.direction;
         }
 
-        public bool GetDebug(out BoidParticleDebug dbg)
-        {
-            if (EnableDebugObjects)
-            {
-                if (!debugObjects)
-                {
-                    debugObjects = new GameObject("Debugging");
-                }
-
-                dbg = new BoidParticleDebug(this, debugObjects.transform);
-                return true;
-            }
-            else
-            {
-                if (debugObjects)
-                {
-                    Destroy(debugObjects);
-                }
-
-                dbg = null;
-                return false;
-            }
-        }
-
         private static Vector3 ClampedDelta(Vector3 v, Vector3 dv, float max)
         {
             if ((v + dv).sqrMagnitude > max * max)
