@@ -47,7 +47,7 @@ namespace Boids
             {
                 float speed = settings.MaxSpeed;
                 target = new BoidTarget(steer.normalized, speed);
-                priority = PriorityMedium;
+                priority = PriorityHigh;
                 return true;
             }
 
