@@ -31,21 +31,20 @@ namespace Boids
             int count = 0;
             Vector3 steer = Vector3.zero;
 
-            RaycastHit hit;
-            if (context.RequestSphereCast(state.position, settings.SeparationDistance, state.direction, out hit, DetectionDistance, Layers, QueryTriggerInteraction.Ignore))
+            if (context.RequestSphereCast(state, state.position, settings.SeparationDistance, state.direction, DetectionDistance, Layers, QueryTriggerInteraction.Ignore))
             {
-                if (GetAvoidanceSteering(boid, state, hit, out Vector3 collSteer))
+                if (GetAvoidanceSteering(boid, state, out Vector3 collSteer))
                 {
-                    BoidDebug.AddCollisionPoint(boid, state, hit.point, collSteer);
+                    BoidDebug.AddCollisionPoint(boid, state, state.hitInfo.point, collSteer);
                     steer += collSteer;
                     ++count;
                 }
             }
-            else if (context.RequestRayCast(state.position, state.direction, out hit, DetectionDistance, Layers, QueryTriggerInteraction.Ignore))
+            else if (context.RequestRayCast(state, state.position, state.direction, DetectionDistance, Layers, QueryTriggerInteraction.Ignore))
             {
-                if (GetAvoidanceSteering(boid, state, hit, out Vector3 collSteer))
+                if (GetAvoidanceSteering(boid, state, out Vector3 collSteer))
                 {
-                    BoidDebug.AddCollisionPoint(boid, state, hit.point, collSteer);
+                    BoidDebug.AddCollisionPoint(boid, state, state.hitInfo.point, collSteer);
                     steer += collSteer;
                     ++count;
                 }
@@ -64,15 +63,15 @@ namespace Boids
             return false;
         }
 
-        private bool GetAvoidanceSteering(BoidParticle boid, BoidState state, RaycastHit hit, out Vector3 steer)
+        private bool GetAvoidanceSteering(BoidParticle boid, BoidState state, out Vector3 steer)
         {
             if (boid.EnableDebugObjects)
             {
 
             }
-            if (hit.collider != null && hit.distance > 0.0f)
+            if (state.hitInfo.collider != null && state.hitInfo.distance > 0.0f)
             {
-                Vector3 delta = state.position - hit.point;
+                Vector3 delta = state.position - state.hitInfo.point;
                 float sqrDist = delta.sqrMagnitude;
                 if (sqrDist > 0.0f)
                 {

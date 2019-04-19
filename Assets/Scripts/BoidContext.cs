@@ -19,6 +19,8 @@ namespace Boids
         public float roll;
         public Vector3 angularVelocity;
 
+        public RaycastHit hitInfo;
+
         public BoidState(BoidParticle boid)
         {
             instanceID = boid.GetInstanceID();
@@ -99,14 +101,14 @@ namespace Boids
         {
         }
 
-        public bool RequestRayCast(Vector3 origin, Vector3 direction, out RaycastHit hitInfo, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
+        public bool RequestRayCast(BoidState state, Vector3 origin, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
         {
-            return Physics.Raycast(origin, direction, out hitInfo, maxDistance, layerMask, queryTriggerInteraction);
+            return Physics.Raycast(origin, direction, out state.hitInfo, maxDistance, layerMask, queryTriggerInteraction);
         }
 
-        public bool RequestSphereCast(Vector3 origin, float radius, Vector3 direction, out RaycastHit hitInfo, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
+        public bool RequestSphereCast(BoidState state, Vector3 origin, float radius, Vector3 direction, float maxDistance, int layerMask, QueryTriggerInteraction queryTriggerInteraction)
         {
-            return Physics.SphereCast(origin, radius, direction, out hitInfo, maxDistance, layerMask, queryTriggerInteraction);
+            return Physics.SphereCast(origin, radius, direction, out state.hitInfo, maxDistance, layerMask, queryTriggerInteraction);
         }
     }
 }
