@@ -1,3 +1,6 @@
 [submodule "Assets/shwarm"]
 	path = Assets/shwarm
 	url = https://github.com/lukastoenneMS/shwarm.git
+[submodule "Assets/MRTK"]
+	path = Assets/MRTK
+	url = https://github.com/lukastoenneMS/MixedRealityToolkit-Unity.git
