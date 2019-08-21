@@ -4,3 +4,4 @@
 [submodule "Assets/MRTK"]
 	path = Assets/MRTK
 	url = https://github.com/lukastoenneMS/MixedRealityToolkit-Unity.git
+	branch = mrtk_development
