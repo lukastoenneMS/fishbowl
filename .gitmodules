@@ -1,0 +1,3 @@
+[submodule "Assets/shwarm"]
+	path = Assets/shwarm
+	url = https://github.com/lukastoenneMS/shwarm.git
