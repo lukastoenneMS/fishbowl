@@ -12,4 +12,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 059a5a48676492548b6cdfaf16b5eb58, type: 3}
   m_Name: SeparateRule
   m_EditorClassIdentifier: 
-  SeparationDistance: 0.3
