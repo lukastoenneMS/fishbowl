@@ -78,15 +78,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _TexA:
         m_Texture: {fileID: 2800000, guid: b210748ea45f529409f315cc53a2a59a, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 0.4, y: 0.4}
         m_Offset: {x: 0, y: 0}
     - _TexB:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 060e7841b8046fe498306255e74de7e8, type: 3}
+        m_Scale: {x: 0.4, y: 0.4}
         m_Offset: {x: 0, y: 0}
     - _TexC:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 6d429891193b09142aa5b9cb46e07f04, type: 3}
+        m_Scale: {x: 0.4, y: 0.4}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AlbedoAlphaMode: 0
@@ -170,12 +170,22 @@ Material:
     - _StencilReadMask: 255
     - _StencilReference: 0
     - _StencilWriteMask: 255
+    - _TextureExponent: 5.37
     - _TriplanarMappingBlendSharpness: 4
     - _UVSec: 0
     - _UseUIAlphaClip: 0
     - _VertexColors: 1
     - _VertexExtrusion: 0
     - _VertexExtrusionValue: 0
+    - _WaveAX: 54.57
+    - _WaveAY: 79.52
+    - _WaveBX: 1
+    - _WaveBY: 0
+    - _WaveCX: 1
+    - _WaveCY: 0
+    - _WavePhase: 3.3920915
+    - _WaveShift: 0.13
+    - _WaveStretch: 0
     - _WindQuality: 0
     - _ZOffsetFactor: 0
     - _ZOffsetUnits: 0
@@ -183,7 +193,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _ClippingBorderColor: {r: 1, g: 0.2, b: 0, a: 1}
-    - _Color: {r: 0.59136003, g: 0.67452, b: 0.693, a: 1}
+    - _Color: {r: 0.6244626, g: 0.72677565, b: 0.755, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 1}
     - _EnvironmentColorX: {r: 1, g: 0, b: 0, a: 1}
@@ -196,3 +206,6 @@ Material:
     - _ProximityLightMiddleColorOverride: {r: 0, g: 1, b: 0, a: 0.5}
     - _ProximityLightOuterColorOverride: {r: 0, g: 0, b: 1, a: 1}
     - _RimColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+    - _WaveA: {r: 0.15, g: 0, b: 0, a: 0}
+    - _WaveB: {r: 0, g: 0.15, b: 0, a: 0}
+    - _WaveC: {r: -0.7, g: -0.7, b: 0, a: 0}

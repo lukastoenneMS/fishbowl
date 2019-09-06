@@ -28,7 +28,6 @@ namespace FishBowl
 
         protected static class Styles
         {
-            public static string primaryMapsTitle = "Main Maps";
             public static string renderingOptionsTitle = "Rendering Options";
             public static string advancedOptionsTitle = "Advanced Options";
             public static string fluentOptionsTitle = "Fluent Options";
@@ -36,18 +35,23 @@ namespace FishBowl
             public static string instancedColorFeatureName = "_INSTANCED_COLOR";
             public static string stencilComparisonName = "_StencilComparison";
             public static string stencilOperationName = "_StencilOperation";
+            public static string disableTexMapAName = "_DISABLE_TEX_MAP_A";
+            public static string disableTexMapBName = "_DISABLE_TEX_MAP_B";
+            public static string disableTexMapCName = "_DISABLE_TEX_MAP_C";
             public static string albedoMapAlphaMetallicName = "_METALLIC_TEXTURE_ALBEDO_CHANNEL_A";
             public static string albedoMapAlphaSmoothnessName = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
             public static string propertiesComponentHelp = "Use the {0} component(s) to control {1} properties.";
             public static readonly string[] albedoAlphaModeNames = Enum.GetNames(typeof(AlbedoAlphaMode));
             public static GUIContent instancedColor = new GUIContent("Instanced Color", "Enable a Unique Color Per Instance");
-            public static GUIContent albedo = new GUIContent("Albedo", "Albedo (RGB) and Transparency (Alpha)");
+            public static GUIContent texA = new GUIContent("Texture A", "Texture A");
+            public static GUIContent texB = new GUIContent("Texture B", "Texture B");
+            public static GUIContent texC = new GUIContent("Texture C", "Texture C");
+            public static GUIContent albedoColor = new GUIContent("Albedo Color", "Albedo Color");
             public static GUIContent albedoAssignedAtRuntime = new GUIContent("Assigned at Runtime", "As an optimization albedo operations are disabled when no albedo texture is specified. If a albedo texture will be specified at runtime enable this option.");
             public static GUIContent alphaCutoff = new GUIContent("Alpha Cutoff", "Threshold for Alpha Cutoff");
+            public static GUIContent textureExponent = new GUIContent("Texture Exponent", "Texture Exponent");
             public static GUIContent metallic = new GUIContent("Metallic", "Metallic Value");
             public static GUIContent smoothness = new GUIContent("Smoothness", "Smoothness Value");
-            public static GUIContent enableChannelMap = new GUIContent("Channel Map", "Enable Channel Map, a Channel Packing Texture That Follows Unity's Standard Channel Setup");
-            public static GUIContent channelMap = new GUIContent("Channel Map", "Metallic (Red), Occlusion (Green), Emission (Blue), Smoothness (Alpha)");
             public static GUIContent enableNormalMap = new GUIContent("Normal Map", "Enable Normal Map");
             public static GUIContent normalMap = new GUIContent("Normal Map");
             public static GUIContent normalMapScale = new GUIContent("Scale", "Scales the Normal Map Normal");
@@ -85,25 +89,9 @@ namespace FishBowl
             public static GUIContent proximityLightSubtractive = new GUIContent("Subtractive", "Proximity Lights Remove Light from a Surface, Used to Mimic a Shadow");
             public static GUIContent proximityLightTwoSided = new GUIContent("Two Sided", "Proximity Lights Apply to Both Sides of a Surface");
             public static GUIContent fluentLightIntensity = new GUIContent("Light Intensity", "Intensity Scaler for All Hover and Proximity Lights");
-            public static GUIContent roundCorners = new GUIContent("Round Corners", "(Assumes UVs Specify Borders of Surface, Works Best on Unity Cube, Quad, and Plane)");
-            public static GUIContent roundCornerRadius = new GUIContent("Unit Radius", "Rounded Rectangle Corner Unit Sphere Radius");
-            public static GUIContent roundCornerMargin = new GUIContent("Margin %", "Distance From Geometry Edge");
-            public static GUIContent borderLight = new GUIContent("Border Light", "Enable Border Lighting (Assumes UVs Specify Borders of Surface, Works Best on Unity Cube, Quad, and Plane)");
-            public static GUIContent borderLightUsesHoverColor = new GUIContent("Use Hover Color", "Border Color Comes From Hover Light Color Override");
-            public static GUIContent borderLightReplacesAlbedo = new GUIContent("Replace Albedo", "Border Light Replaces Albedo (Replacement Rather Than Additive)");
-            public static GUIContent borderLightOpaque = new GUIContent("Opaque Borders", "Borders Override Alpha Value to Appear Opaque");
-            public static GUIContent borderWidth = new GUIContent("Width %", "Uniform Width Along Border as a % of the Smallest XYZ Dimension");
-            public static GUIContent borderMinValue = new GUIContent("Brightness", "Brightness Scaler");
-            public static GUIContent edgeSmoothingValue = new GUIContent("Edge Smoothing Value", "Smooths Edges When Round Corners and Transparency Is Enabled");
-            public static GUIContent borderLightOpaqueAlpha = new GUIContent("Alpha", "Alpha value of \"opaque\" borders.");
             public static GUIContent innerGlow = new GUIContent("Inner Glow", "Enable Inner Glow (Assumes UVs Specify Borders of Surface, Works Best on Unity Cube, Quad, and Plane)");
             public static GUIContent innerGlowColor = new GUIContent("Color", "Inner Glow Color (RGB) and Intensity (A)");
             public static GUIContent innerGlowPower = new GUIContent("Power", "Power Exponent to Control Glow");
-            public static GUIContent iridescence = new GUIContent("Iridescence", "Simulated Iridescence via Albedo Changes with the Angle of Observation)");
-            public static GUIContent iridescentSpectrumMap = new GUIContent("Spectrum Map", "Spectrum of Colors to Apply (Usually a Texture with ROYGBIV from Left to Right)");
-            public static GUIContent iridescenceIntensity = new GUIContent("Intensity", "Intensity of Iridescence");
-            public static GUIContent iridescenceThreshold = new GUIContent("Threshold", "Threshold Window to Sample From the Spectrum Map");
-            public static GUIContent iridescenceAngle = new GUIContent("Angle", "Surface Angle");
             public static GUIContent environmentColoring = new GUIContent("Environment Coloring", "Change Color Based on View");
             public static GUIContent environmentColorThreshold = new GUIContent("Threshold", "Threshold When Environment Coloring Should Appear Based on Surface Normal");
             public static GUIContent environmentColorIntensity = new GUIContent("Intensity", "Intensity (or Brightness) of the Environment Coloring");
@@ -114,19 +102,23 @@ namespace FishBowl
             public static GUIContent stencilReference = new GUIContent("Stencil Reference", "Value to Compared Against (if Comparison is Anything but Always) and/or the Value to be Written to the Buffer (if Either Pass, Fail or ZFail is Set to Replace)");
             public static GUIContent stencilComparison = new GUIContent("Stencil Comparison", "Function to Compare the Reference Value to");
             public static GUIContent stencilOperation = new GUIContent("Stencil Operation", "What to do When the Stencil Test Passes");
-            public static GUIContent ignoreZScale = new GUIContent("Ignore Z Scale", "For Features That Use Object Scale (Round Corners, Border Light, etc.), Ignore the Z Scale of the Object");
         }
 
-        protected MaterialProperty instancedColor;
         protected MaterialProperty texMapA;
         protected MaterialProperty texMapB;
         protected MaterialProperty texMapC;
+        protected MaterialProperty waveA;
+        protected MaterialProperty waveB;
+        protected MaterialProperty waveC;
+        protected MaterialProperty waveStretch;
+        protected MaterialProperty waveShift;
+        protected MaterialProperty wavePhase;
+        protected MaterialProperty instancedColor;
         protected MaterialProperty albedoColor;
         protected MaterialProperty albedoAlphaMode;
         protected MaterialProperty albedoAssignedAtRuntime;
         protected MaterialProperty alphaCutoff;
-        protected MaterialProperty enableChannelMap;
-        protected MaterialProperty channelMap;
+        protected MaterialProperty textureExponent;
         protected MaterialProperty enableNormalMap;
         protected MaterialProperty normalMap;
         protected MaterialProperty normalMapScale;
@@ -166,25 +158,9 @@ namespace FishBowl
         protected MaterialProperty proximityLightSubtractive;
         protected MaterialProperty proximityLightTwoSided;
         protected MaterialProperty fluentLightIntensity;
-        protected MaterialProperty roundCorners;
-        protected MaterialProperty roundCornerRadius;
-        protected MaterialProperty roundCornerMargin;
-        protected MaterialProperty borderLight;
-        protected MaterialProperty borderLightUsesHoverColor;
-        protected MaterialProperty borderLightReplacesAlbedo;
-        protected MaterialProperty borderLightOpaque;
-        protected MaterialProperty borderWidth;
-        protected MaterialProperty borderMinValue;
-        protected MaterialProperty edgeSmoothingValue;
-        protected MaterialProperty borderLightOpaqueAlpha;
         protected MaterialProperty innerGlow;
         protected MaterialProperty innerGlowColor;
         protected MaterialProperty innerGlowPower;
-        protected MaterialProperty iridescence;
-        protected MaterialProperty iridescentSpectrumMap;
-        protected MaterialProperty iridescenceIntensity;
-        protected MaterialProperty iridescenceThreshold;
-        protected MaterialProperty iridescenceAngle;
         protected MaterialProperty environmentColoring;
         protected MaterialProperty environmentColorThreshold;
         protected MaterialProperty environmentColorIntensity;
@@ -195,7 +171,6 @@ namespace FishBowl
         protected MaterialProperty stencilReference;
         protected MaterialProperty stencilComparison;
         protected MaterialProperty stencilOperation;
-        protected MaterialProperty ignoreZScale;
 
         protected override void FindProperties(MaterialProperty[] props)
         {
@@ -205,14 +180,19 @@ namespace FishBowl
             texMapA = FindProperty("_TexA", props);
             texMapB = FindProperty("_TexB", props);
             texMapC = FindProperty("_TexC", props);
+            waveA = FindProperty("_WaveA", props);
+            waveB = FindProperty("_WaveB", props);
+            waveC = FindProperty("_WaveC", props);
+            waveStretch = FindProperty("_WaveStretch", props);
+            waveShift = FindProperty("_WaveShift", props);
+            wavePhase = FindProperty("_WavePhase", props);
             albedoColor = FindProperty("_Color", props);
             albedoAlphaMode = FindProperty("_AlbedoAlphaMode", props);
             albedoAssignedAtRuntime = FindProperty("_AlbedoAssignedAtRuntime", props);
             alphaCutoff = FindProperty("_Cutoff", props);
+            textureExponent = FindProperty("_TextureExponent", props);
             metallic = FindProperty("_Metallic", props);
             smoothness = FindProperty("_Smoothness", props);
-            enableChannelMap = FindProperty("_EnableChannelMap", props);
-            channelMap = FindProperty("_ChannelMap", props);
             enableNormalMap = FindProperty("_EnableNormalMap", props);
             normalMap = FindProperty("_NormalMap", props);
             normalMapScale = FindProperty("_NormalMapScale", props);
@@ -250,25 +230,9 @@ namespace FishBowl
             proximityLightSubtractive = FindProperty("_ProximityLightSubtractive", props);
             proximityLightTwoSided = FindProperty("_ProximityLightTwoSided", props);
             fluentLightIntensity = FindProperty("_FluentLightIntensity", props);
-            roundCorners = FindProperty("_RoundCorners", props);
-            roundCornerRadius = FindProperty("_RoundCornerRadius", props);
-            roundCornerMargin = FindProperty("_RoundCornerMargin", props);
-            borderLight = FindProperty("_BorderLight", props);
-            borderLightUsesHoverColor = FindProperty("_BorderLightUsesHoverColor", props);
-            borderLightReplacesAlbedo = FindProperty("_BorderLightReplacesAlbedo", props);
-            borderLightOpaque = FindProperty("_BorderLightOpaque", props);
-            borderWidth = FindProperty("_BorderWidth", props);
-            borderMinValue = FindProperty("_BorderMinValue", props);
-            edgeSmoothingValue = FindProperty("_EdgeSmoothingValue", props);
-            borderLightOpaqueAlpha = FindProperty("_BorderLightOpaqueAlpha", props);
             innerGlow = FindProperty("_InnerGlow", props);
             innerGlowColor = FindProperty("_InnerGlowColor", props);
             innerGlowPower = FindProperty("_InnerGlowPower", props);
-            iridescence = FindProperty("_Iridescence", props);
-            iridescentSpectrumMap = FindProperty("_IridescentSpectrumMap", props);
-            iridescenceIntensity = FindProperty("_IridescenceIntensity", props);
-            iridescenceThreshold = FindProperty("_IridescenceThreshold", props);
-            iridescenceAngle = FindProperty("_IridescenceAngle", props);
             environmentColoring = FindProperty("_EnvironmentColoring", props);
             environmentColorThreshold = FindProperty("_EnvironmentColorThreshold", props);
             environmentColorIntensity = FindProperty("_EnvironmentColorIntensity", props);
@@ -279,7 +243,6 @@ namespace FishBowl
             stencilReference = FindProperty("_StencilReference", props);
             stencilComparison = FindProperty(Styles.stencilComparisonName, props);
             stencilOperation = FindProperty(Styles.stencilOperationName, props);
-            ignoreZScale = FindProperty("_IgnoreZScale", props);
         }
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
@@ -288,9 +251,10 @@ namespace FishBowl
 
             base.OnGUI(materialEditor, props);
 
-            MainMapOptions(materialEditor, material, texMapA);
-            MainMapOptions(materialEditor, material, texMapB);
-            MainMapOptions(materialEditor, material, texMapC);
+            SharedMapOptions(materialEditor, material);
+            TextureMapOptions(materialEditor, material, texMapA, waveA, Styles.texA, Styles.disableTexMapAName);
+            TextureMapOptions(materialEditor, material, texMapB, waveB, Styles.texB, Styles.disableTexMapBName);
+            TextureMapOptions(materialEditor, material, texMapC, waveC, Styles.texC, Styles.disableTexMapCName);
             RenderingOptions(materialEditor, material);
             FluentOptions(materialEditor, material);
             AdvancedOptions(materialEditor, material);
@@ -376,59 +340,39 @@ namespace FishBowl
 
         protected override void MaterialChanged(Material material)
         {
-            SetupMaterialWithAlbedo(material, texMapA, albedoAlphaMode, albedoAssignedAtRuntime);
-            SetupMaterialWithAlbedo(material, texMapB, albedoAlphaMode, albedoAssignedAtRuntime);
-            SetupMaterialWithAlbedo(material, texMapC, albedoAlphaMode, albedoAssignedAtRuntime);
+            SetupMaterialWithAlbedo(material, texMapA, albedoAlphaMode, albedoAssignedAtRuntime, Styles.disableTexMapAName);
+            SetupMaterialWithAlbedo(material, texMapB, albedoAlphaMode, albedoAssignedAtRuntime, Styles.disableTexMapBName);
+            SetupMaterialWithAlbedo(material, texMapC, albedoAlphaMode, albedoAssignedAtRuntime, Styles.disableTexMapCName);
 
             base.MaterialChanged(material);
         }
 
-        protected void MainMapOptions(MaterialEditor materialEditor, Material material, MaterialProperty albedoMap)
+        protected void SharedMapOptions(MaterialEditor materialEditor, Material material)
         {
-            GUILayout.Label(Styles.primaryMapsTitle, EditorStyles.boldLabel);
+            materialEditor.ShaderProperty(albedoColor, Styles.albedoColor);
 
-            materialEditor.TexturePropertySingleLine(Styles.albedo, albedoMap, albedoColor);
+            materialEditor.ShaderProperty(albedoAssignedAtRuntime, Styles.albedoAssignedAtRuntime, 2);
 
-            if (albedoMap.textureValue == null)
+            materialEditor.ShaderProperty(waveStretch, "Wave Stretch");
+            materialEditor.ShaderProperty(waveShift, "Wave Shift");
+            materialEditor.ShaderProperty(wavePhase, "Wave Phase");
+
+            albedoAlphaMode.floatValue = EditorGUILayout.Popup(albedoAlphaMode.displayName, (int)albedoAlphaMode.floatValue, Styles.albedoAlphaModeNames);
+
+            if ((RenderingMode)renderingMode.floatValue == RenderingMode.TransparentCutout || 
+                (RenderingMode)renderingMode.floatValue == RenderingMode.Custom)
             {
-                materialEditor.ShaderProperty(albedoAssignedAtRuntime, Styles.albedoAssignedAtRuntime, 2);
+                materialEditor.ShaderProperty(alphaCutoff, Styles.alphaCutoff.text);
             }
 
-            materialEditor.ShaderProperty(enableChannelMap, Styles.enableChannelMap);
-
-            if (PropertyEnabled(enableChannelMap))
+            if ((AlbedoAlphaMode)albedoAlphaMode.floatValue != AlbedoAlphaMode.Metallic)
             {
-                EditorGUI.indentLevel += 2;
-                materialEditor.TexturePropertySingleLine(Styles.channelMap, channelMap);
-                GUILayout.Box("Metallic (Red), Occlusion (Green), Emission (Blue), Smoothness (Alpha)", EditorStyles.helpBox, new GUILayoutOption[0]);
-                EditorGUI.indentLevel -= 2;
+                materialEditor.ShaderProperty(metallic, Styles.metallic);
             }
 
-            if (!PropertyEnabled(enableChannelMap))
+            if ((AlbedoAlphaMode)albedoAlphaMode.floatValue != AlbedoAlphaMode.Smoothness)
             {
-                EditorGUI.indentLevel += 2;
-
-                albedoAlphaMode.floatValue = EditorGUILayout.Popup(albedoAlphaMode.displayName, (int)albedoAlphaMode.floatValue, Styles.albedoAlphaModeNames);
-
-                if ((RenderingMode)renderingMode.floatValue == RenderingMode.TransparentCutout || 
-                    (RenderingMode)renderingMode.floatValue == RenderingMode.Custom)
-                {
-                    materialEditor.ShaderProperty(alphaCutoff, Styles.alphaCutoff.text);
-                }
-
-                if ((AlbedoAlphaMode)albedoAlphaMode.floatValue != AlbedoAlphaMode.Metallic)
-                {
-                    materialEditor.ShaderProperty(metallic, Styles.metallic);
-                }
-
-                if ((AlbedoAlphaMode)albedoAlphaMode.floatValue != AlbedoAlphaMode.Smoothness)
-                {
-                    materialEditor.ShaderProperty(smoothness, Styles.smoothness);
-                }
-
-                SetupMaterialWithAlbedo(material, albedoMap, albedoAlphaMode, albedoAssignedAtRuntime);
-
-                EditorGUI.indentLevel -= 2;
+                materialEditor.ShaderProperty(smoothness, Styles.smoothness);
             }
 
             if (PropertyEnabled(directionalLight) ||
@@ -452,15 +396,37 @@ namespace FishBowl
             {
                 materialEditor.ShaderProperty(emissiveColor, Styles.emissiveColor, 2);
             }
+        }
+
+        protected void TextureMapOptions(
+            MaterialEditor materialEditor,
+            Material material,
+            MaterialProperty albedoMap,
+            MaterialProperty wave,
+            GUIContent style,
+            string disableMapFeature)
+        {
+            materialEditor.TexturePropertySingleLine(style, albedoMap);
+
+            SetupMaterialWithAlbedo(material, albedoMap, albedoAlphaMode, albedoAssignedAtRuntime, disableMapFeature);
 
             EditorGUILayout.Space();
+
+            EditorGUI.indentLevel += 2;
+
             materialEditor.TextureScaleOffsetProperty(albedoMap);
+
+            materialEditor.ShaderProperty(wave, "Wave Vector");
+
+            EditorGUI.indentLevel -= 2;
         }
 
         protected void RenderingOptions(MaterialEditor materialEditor, Material material)
         {
             EditorGUILayout.Space();
             GUILayout.Label(Styles.renderingOptionsTitle, EditorStyles.boldLabel);
+
+            materialEditor.ShaderProperty(textureExponent, Styles.textureExponent);
 
             materialEditor.ShaderProperty(directionalLight, Styles.directionalLight);
 
@@ -566,50 +532,9 @@ namespace FishBowl
                 GUILayout.Box(string.Format(Styles.propertiesComponentHelp, nameof(ProximityLight), Styles.proximityLight.text), EditorStyles.helpBox, new GUILayoutOption[0]);
             }
 
-            materialEditor.ShaderProperty(borderLight, Styles.borderLight);
-
-            if (PropertyEnabled(borderLight))
-            {
-                materialEditor.ShaderProperty(borderWidth, Styles.borderWidth, 2);
-
-                materialEditor.ShaderProperty(borderMinValue, Styles.borderMinValue, 2);
-
-                materialEditor.ShaderProperty(borderLightReplacesAlbedo, Styles.borderLightReplacesAlbedo, 2);
-                
-                if (PropertyEnabled(hoverLight) && PropertyEnabled(enableHoverColorOverride))
-                {
-                    materialEditor.ShaderProperty(borderLightUsesHoverColor, Styles.borderLightUsesHoverColor, 2);
-                }
-
-                if (mode == RenderingMode.TransparentCutout || mode == RenderingMode.Transparent ||
-                    (mode == RenderingMode.Custom && customMode == CustomRenderingMode.TransparentCutout) ||
-                    (mode == RenderingMode.Custom && customMode == CustomRenderingMode.Transparent))
-                {
-                    materialEditor.ShaderProperty(borderLightOpaque, Styles.borderLightOpaque, 2);
-
-                    if (PropertyEnabled(borderLightOpaque))
-                    {
-                        materialEditor.ShaderProperty(borderLightOpaqueAlpha, Styles.borderLightOpaqueAlpha, 4);
-                    }
-                }
-            }
-
-            if (PropertyEnabled(hoverLight) || PropertyEnabled(proximityLight) || PropertyEnabled(borderLight))
+            if (PropertyEnabled(hoverLight) || PropertyEnabled(proximityLight))
             {
                 materialEditor.ShaderProperty(fluentLightIntensity, Styles.fluentLightIntensity);
-            }
-
-            materialEditor.ShaderProperty(roundCorners, Styles.roundCorners);
-
-            if (PropertyEnabled(roundCorners))
-            {
-                materialEditor.ShaderProperty(roundCornerRadius, Styles.roundCornerRadius, 2);
-                materialEditor.ShaderProperty(roundCornerMargin, Styles.roundCornerMargin, 2);
-            }
-
-            if (PropertyEnabled(roundCorners) || PropertyEnabled(borderLight))
-            {
-                materialEditor.ShaderProperty(edgeSmoothingValue, Styles.edgeSmoothingValue);
             }
 
             materialEditor.ShaderProperty(innerGlow, Styles.innerGlow);
@@ -618,18 +543,6 @@ namespace FishBowl
             {
                 materialEditor.ShaderProperty(innerGlowColor, Styles.innerGlowColor, 2);
                 materialEditor.ShaderProperty(innerGlowPower, Styles.innerGlowPower, 2);
-            }
-
-            materialEditor.ShaderProperty(iridescence, Styles.iridescence);
-
-            if (PropertyEnabled(iridescence))
-            {
-                EditorGUI.indentLevel += 2;
-                materialEditor.TexturePropertySingleLine(Styles.iridescentSpectrumMap, iridescentSpectrumMap);
-                EditorGUI.indentLevel -= 2;
-                materialEditor.ShaderProperty(iridescenceIntensity, Styles.iridescenceIntensity, 2);
-                materialEditor.ShaderProperty(iridescenceThreshold, Styles.iridescenceThreshold, 2);
-                materialEditor.ShaderProperty(iridescenceAngle, Styles.iridescenceAngle, 2);
             }
 
             materialEditor.ShaderProperty(environmentColoring, Styles.environmentColoring);
@@ -664,7 +577,7 @@ namespace FishBowl
 
             // Enable instancing to disable batching. Static and dynamic batching will normalize the object scale, which breaks 
             // features which utilize object scale.
-            GUI.enabled = !ScaleRequired();
+            GUI.enabled = true;
 
             if (!GUI.enabled && !material.enableInstancing)
             {
@@ -699,21 +612,24 @@ namespace FishBowl
                 material.SetInt(Styles.stencilComparisonName, (int)CompareFunction.Disabled);
                 material.SetInt(Styles.stencilOperationName, (int)StencilOp.Keep);
             }
+        }
 
-            if (ScaleRequired())
+        protected static void SetupMaterialWithAlbedo(
+            Material material,
+            MaterialProperty albedoMap,
+            MaterialProperty albedoAlphaMode,
+            MaterialProperty albedoAssignedAtRuntime,
+            string disableMapFeature)
+        {
+            if (albedoMap != null && (albedoMap.textureValue || PropertyEnabled(albedoAssignedAtRuntime)))
             {
-                materialEditor.ShaderProperty(ignoreZScale, Styles.ignoreZScale);
+                material.DisableKeyword(disableMapFeature);
             }
-        }
+            else
+            {
+                material.EnableKeyword(disableMapFeature);
+            }
 
-        protected bool ScaleRequired()
-        {
-            return PropertyEnabled(roundCorners) || 
-                   PropertyEnabled(borderLight);
-        }
-
-        protected static void SetupMaterialWithAlbedo(Material material, MaterialProperty albedoMap, MaterialProperty albedoAlphaMode, MaterialProperty albedoAssignedAtRuntime)
-        {
             switch ((AlbedoAlphaMode)albedoAlphaMode.floatValue)
             {
                 case AlbedoAlphaMode.Transparency:

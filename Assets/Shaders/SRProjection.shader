@@ -12,13 +12,21 @@ Shader "FishBowl/SRProjection"
         _TexB("Tex B", 2D) = "white" {}
         _TexC("Tex C", 2D) = "white" {}
 
+        _WaveA ("Texture Wave Number A", Vector) = (1, 0, 0, 0)
+        _WaveB ("Texture Wave Number B", Vector) = (1, 0, 0, 0)
+        _WaveC ("Texture Wave Number C", Vector) = (1, 0, 0, 0)
+
+        _WaveStretch ("Texture Wave Stretch", Float) = 0.0
+        _WaveShift ("Texture Wave Shift", Float) = 0.1
+        _WavePhase ("Texture Wave Phase", Float) = 0.0
+
+        _TextureExponent("Texture Exponent", Range(0.1, 10.0)) = 1.0
+
         [Enum(AlbedoAlphaMode)] _AlbedoAlphaMode("Albedo Alpha Mode", Float) = 0 // "Transparency"
         [Toggle] _AlbedoAssignedAtRuntime("Albedo Assigned at Runtime", Float) = 0.0
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
         _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
-        [Toggle(_CHANNEL_MAP)] _EnableChannelMap("Enable Channel Map", Float) = 0.0
-        [NoScaleOffset] _ChannelMap("Channel Map", 2D) = "white" {}
         [Toggle(_NORMAL_MAP)] _EnableNormalMap("Enable Normal Map", Float) = 0.0
         [NoScaleOffset] _NormalMap("Normal Map", 2D) = "bump" {}
         _NormalMapScale("Scale", Float) = 1.0
@@ -60,25 +68,9 @@ Shader "FishBowl/SRProjection"
         [Toggle(_PROXIMITY_LIGHT_SUBTRACTIVE)] _ProximityLightSubtractive("Proximity Light Subtractive", Float) = 0.0
         [Toggle(_PROXIMITY_LIGHT_TWO_SIDED)] _ProximityLightTwoSided("Proximity Light Two Sided", Float) = 0.0
         _FluentLightIntensity("Fluent Light Intensity", Range(0.0, 1.0)) = 1.0
-        [Toggle(_ROUND_CORNERS)] _RoundCorners("Round Corners", Float) = 0.0
-        _RoundCornerRadius("Round Corner Radius", Range(0.0, 0.5)) = 0.25
-        _RoundCornerMargin("Round Corner Margin", Range(0.0, 0.5)) = 0.01
-        [Toggle(_BORDER_LIGHT)] _BorderLight("Border Light", Float) = 0.0
-        [Toggle(_BORDER_LIGHT_USES_HOVER_COLOR)] _BorderLightUsesHoverColor("Border Light Uses Hover Color", Float) = 0.0
-        [Toggle(_BORDER_LIGHT_REPLACES_ALBEDO)] _BorderLightReplacesAlbedo("Border Light Replaces Albedo", Float) = 0.0
-        [Toggle(_BORDER_LIGHT_OPAQUE)] _BorderLightOpaque("Border Light Opaque", Float) = 0.0
-        _BorderWidth("Border Width", Range(0.0, 1.0)) = 0.1
-        _BorderMinValue("Border Min Value", Range(0.0, 1.0)) = 0.1
-        _EdgeSmoothingValue("Edge Smoothing Value", Range(0.0, 0.2)) = 0.002
-        _BorderLightOpaqueAlpha("Border Light Opaque Alpha", Range(0.0, 1.0)) = 1.0
         [Toggle(_INNER_GLOW)] _InnerGlow("Inner Glow", Float) = 0.0
         _InnerGlowColor("Inner Glow Color (RGB) and Intensity (A)", Color) = (1.0, 1.0, 1.0, 0.75)
         _InnerGlowPower("Inner Glow Power", Range(2.0, 32.0)) = 4.0
-        [Toggle(_IRIDESCENCE)] _Iridescence("Iridescence", Float) = 0.0
-        [NoScaleOffset] _IridescentSpectrumMap("Iridescent Spectrum Map", 2D) = "white" {}
-        _IridescenceIntensity("Iridescence Intensity", Range(0.0, 1.0)) = 0.5
-        _IridescenceThreshold("Iridescence Threshold", Range(0.0, 1.0)) = 0.05
-        _IridescenceAngle("Iridescence Angle", Range(-0.78, 0.78)) = -0.78
         [Toggle(_ENVIRONMENT_COLORING)] _EnvironmentColoring("Environment Coloring", Float) = 0.0
         _EnvironmentColorThreshold("Environment Color Threshold", Range(0.0, 3.0)) = 1.5
         _EnvironmentColorIntensity("Environment Color Intensity", Range(0.0, 1.0)) = 0.5
@@ -100,7 +92,6 @@ Shader "FishBowl/SRProjection"
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode", Float) = 2                     // "Back"
         _RenderQueueOverride("Render Queue Override", Range(-1.0, 5000)) = -1
         [Toggle(_INSTANCED_COLOR)] _InstancedColor("Instanced Color", Float) = 0.0
-        [Toggle(_IGNORE_Z_SCALE)] _IgnoreZScale("Ignore Z Scale", Float) = 0.0
         [Toggle(_STENCIL)] _Stencil("Enable Stencil Testing", Float) = 0.0
         _StencilReference("Stencil Reference", Range(0, 255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)]_StencilComparison("Stencil Comparison", Int) = 0
@@ -115,88 +106,51 @@ CGINCLUDE
         return float2(worldPosition.x, worldPosition.z) * tiling.xy + tiling.zw;
     }
 
+    static const float pi = 3.1415926535897932384626433832795;
+
+    float2 ApplyWave(float2 position, float2 waveVector, float phase, float stretch, float shift)
+    {
+        float2 dir = normalize(waveVector);
+        float2 forward = float2(dir.x, dir.y);
+        float2 right = float2(dir.y, -dir.x);
+
+        float a = dot(waveVector, position) - phase;
+        float w = sin(2.0 * pi * a);
+
+        position += w * (stretch * forward + shift * right);
+
+        return position;
+    }
+
+    fixed4 CombineTextures(sampler2D texA, float2 uvA, sampler2D texB, float2 uvB, sampler2D texC, float2 uvC)
+    {
+        fixed4 albedo = fixed4(0.0, 0.0, 0.0, 1.0);
+        float weight = 0.0;
+
+#if !defined(_DISABLE_TEX_MAP_A)
+        albedo += tex2D(texA, uvA);
+        weight += 1.0;
+#endif
+
+#if !defined(_DISABLE_TEX_MAP_B)
+        albedo += tex2D(texB, uvB);
+        weight += 1.0;
+#endif
+
+#if !defined(_DISABLE_TEX_MAP_C)
+        albedo += tex2D(texC, uvC);
+        weight += 1.0;
+#endif
+
+        albedo /= weight;
+
+        return albedo;
+    }
+
 ENDCG
 
     SubShader
     {
-        // Extracts information for lightmapping, GI (emission, albedo, ...)
-        // This pass it not used during regular rendering.
-        Pass
-        {
-            Name "Meta"
-            Tags { "LightMode" = "Meta" }
-
-            CGPROGRAM
-
-            #pragma vertex vert
-            #pragma fragment frag
-
-            #pragma shader_feature _EMISSION
-            #pragma shader_feature _CHANNEL_MAP
-
-            #include "UnityCG.cginc"
-            #include "UnityMetaPass.cginc"
-
-            // This define will get commented in by the UpgradeShaderForLightweightRenderPipeline method.
-            //#define _LIGHTWEIGHT_RENDER_PIPELINE
-
-            struct v2f
-            {
-                float4 vertex : SV_POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
-            float4 _TexA_ST;
-
-            v2f vert(appdata_full v)
-            {
-                v2f o;
-                o.vertex = UnityMetaVertexPosition(v.vertex, v.texcoord1.xy, v.texcoord2.xy, unity_LightmapST, unity_DynamicLightmapST);
-                // o.uv = TRANSFORM_TEX(v.texcoord, _TexA);
-                o.uv = ProjectToUV(o.vertex.xyz, _TexA_ST);
-
-                return o;
-            }
-
-            sampler2D _TexA;
-            sampler2D _ChannelMap;
-
-            fixed4 _Color;
-            fixed4 _EmissiveColor;
-
-#if defined(_LIGHTWEIGHT_RENDER_PIPELINE)
-            CBUFFER_START(_LightBuffer)
-            float4 _MainLightPosition;
-            half4 _MainLightColor;
-            CBUFFER_END
-#else
-            fixed4 _LightColor0;
-#endif
-
-            half4 frag(v2f i) : SV_Target
-            {
-                UnityMetaInput output;
-                UNITY_INITIALIZE_OUTPUT(UnityMetaInput, output);
-
-                output.Albedo = tex2D(_TexA, i.uv) * _Color;
-#if defined(_EMISSION)
-#if defined(_CHANNEL_MAP)
-                output.Emission += tex2D(_ChannelMap, i.uv).b * _EmissiveColor;
-#else
-                output.Emission += _EmissiveColor;
-#endif
-#endif
-#if defined(_LIGHTWEIGHT_RENDER_PIPELINE)
-                output.SpecularColor = _MainLightColor.rgb;
-#else
-                output.SpecularColor = _LightColor0.rgb;
-#endif
-
-                return UnityMetaFragment(output);
-            }
-            ENDCG
-        }
-
         Pass
         {
             Name "Main"
@@ -233,8 +187,10 @@ ENDCG
             #pragma multi_compile _ _CLIPPING_BOX
 
             #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON
+            #pragma shader_feature _DISABLE_TEX_MAP_A
+            #pragma shader_feature _DISABLE_TEX_MAP_B
+            #pragma shader_feature _DISABLE_TEX_MAP_C
             #pragma shader_feature _ _METALLIC_TEXTURE_ALBEDO_CHANNEL_A _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma shader_feature _CHANNEL_MAP
             #pragma shader_feature _NORMAL_MAP
             #pragma shader_feature _EMISSION
             #pragma shader_feature _DIRECTIONAL_LIGHT
@@ -254,16 +210,9 @@ ENDCG
             #pragma shader_feature _PROXIMITY_LIGHT_COLOR_OVERRIDE
             #pragma shader_feature _PROXIMITY_LIGHT_SUBTRACTIVE
             #pragma shader_feature _PROXIMITY_LIGHT_TWO_SIDED
-            #pragma shader_feature _ROUND_CORNERS
-            #pragma shader_feature _BORDER_LIGHT
-            #pragma shader_feature _BORDER_LIGHT_USES_HOVER_COLOR
-            #pragma shader_feature _BORDER_LIGHT_REPLACES_ALBEDO
-            #pragma shader_feature _BORDER_LIGHT_OPAQUE
             #pragma shader_feature _INNER_GLOW
-            #pragma shader_feature _IRIDESCENCE
             #pragma shader_feature _ENVIRONMENT_COLORING
             #pragma shader_feature _INSTANCED_COLOR
-            #pragma shader_feature _IGNORE_Z_SCALE
 
             #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0.0)); 
 
@@ -274,11 +223,8 @@ ENDCG
             // This define will get commented in by the UpgradeShaderForLightweightRenderPipeline method.
             //#define _LIGHTWEIGHT_RENDER_PIPELINE
 
-#if defined(_DIRECTIONAL_LIGHT) || defined(_SPHERICAL_HARMONICS) || defined(_REFLECTIONS) || defined(_RIM_LIGHT) || defined(_PROXIMITY_LIGHT) || defined(_ENVIRONMENT_COLORING)
             #define _NORMAL
-#else
-            #undef _NORMAL
-#endif
+            #define _WORLD_POSITION
 
 #if defined(_CLIPPING_PLANE) || defined(_CLIPPING_SPHERE) || defined(_CLIPPING_BOX)
         #define _CLIPPING_PRIMITIVE
@@ -286,13 +232,7 @@ ENDCG
         #undef _CLIPPING_PRIMITIVE
 #endif
 
-// #if defined(_NORMAL) || defined(_CLIPPING_PRIMITIVE) || defined(_NEAR_PLANE_FADE) || defined(_HOVER_LIGHT) || defined(_PROXIMITY_LIGHT)
-            #define _WORLD_POSITION
-// #else
-//             #undef _WORLD_POSITION
-// #endif
-
-#if defined(_ALPHATEST_ON) || defined(_CLIPPING_PRIMITIVE) || defined(_ROUND_CORNERS)
+#if defined(_ALPHATEST_ON) || defined(_CLIPPING_PRIMITIVE)
             #define _ALPHA_CLIP
 #else
             #undef _ALPHA_CLIP
@@ -305,19 +245,13 @@ ENDCG
             #undef _TRANSPARENT
 #endif
 
-#if defined(_ROUND_CORNERS) || defined(_BORDER_LIGHT)
-            #define _SCALE
-#else
-            #undef _SCALE
-#endif
-
 #if defined(_DIRECTIONAL_LIGHT) || defined(_RIM_LIGHT)
             #define _FRESNEL
 #else
             #undef _FRESNEL
 #endif
 
-#if defined(_ROUND_CORNERS) || defined(_BORDER_LIGHT) || defined(_INNER_GLOW)
+#if defined(_INNER_GLOW)
             #define _DISTANCE_TO_EDGE
 #else
             #undef _DISTANCE_TO_EDGE
@@ -345,13 +279,13 @@ ENDCG
             struct v2f 
             {
                 float4 position : SV_POSITION;
-#if defined(_BORDER_LIGHT)
-                float4 uv : TEXCOORD0;
-#elif defined(_UV)
-                float2 uv : TEXCOORD0;
+#if defined(_UV)
+                float2 uvA : TEXCOORD0;
+                float2 uvB : TEXCOORD1;
+                float2 uvC : TEXCOORD2;
 #endif
 #if defined(LIGHTMAP_ON)
-                float2 lightMapUV : TEXCOORD1;
+                float2 lightMapUV : TEXCOORD3;
 #endif
 #if defined(_VERTEX_COLORS)
                 fixed4 color : COLOR0;
@@ -359,19 +293,14 @@ ENDCG
 #if defined(_SPHERICAL_HARMONICS)
                 fixed3 ambient : COLOR1;
 #endif
-#if defined(_IRIDESCENCE)
-                fixed3 iridescentColor : COLOR2;
-#endif
 #if defined(_WORLD_POSITION)
 #if defined(_NEAR_PLANE_FADE)
-                float4 worldPosition : TEXCOORD2;
+                float4 worldPosition : TEXCOORD4;
 #else
-                float3 worldPosition : TEXCOORD2;
+                float3 worldPosition : TEXCOORD4;
 #endif
 #endif
-#if defined(_SCALE)
-                float3 scale : TEXCOORD3;
-#endif
+
 #if defined(_NORMAL)
 #if defined(_NORMAL_MAP)
                 fixed3 tangentX : COLOR3;
@@ -395,7 +324,19 @@ ENDCG
             fixed4 _Color;
 #endif
             sampler2D _TexA;
+            sampler2D _TexB;
+            sampler2D _TexC;
             fixed4 _TexA_ST;
+            fixed4 _TexB_ST;
+            fixed4 _TexC_ST;
+            float4 _WaveA;
+            float4 _WaveB;
+            float4 _WaveC;
+            float _WaveStretch;
+            float _WaveShift;
+            float _WavePhase;
+
+            float _TextureExponent;
 
 #if defined(_ALPHA_CLIP)
             fixed _Cutoff;
@@ -403,10 +344,6 @@ ENDCG
 
             fixed _Metallic;
             fixed _Smoothness;
-
-#if defined(_CHANNEL_MAP)
-            sampler2D _ChannelMap;
-#endif
 
 #if defined(_NORMAL_MAP)
             sampler2D _NormalMap;
@@ -496,38 +433,13 @@ ENDCG
 #endif
 #endif
 
-#if defined(_HOVER_LIGHT) || defined(_PROXIMITY_LIGHT) || defined(_BORDER_LIGHT)
+#if defined(_HOVER_LIGHT) || defined(_PROXIMITY_LIGHT)
             fixed _FluentLightIntensity;
-#endif
-
-#if defined(_ROUND_CORNERS)
-            fixed _RoundCornerRadius;
-            fixed _RoundCornerMargin;
-#endif
-
-#if defined(_BORDER_LIGHT)
-            fixed _BorderWidth;
-            fixed _BorderMinValue;
-#endif
-
-#if defined(_BORDER_LIGHT_OPAQUE)
-            fixed _BorderLightOpaqueAlpha;
-#endif
-
-#if defined(_ROUND_CORNERS) || defined(_BORDER_LIGHT)
-            fixed _EdgeSmoothingValue;
 #endif
 
 #if defined(_INNER_GLOW)
             fixed4 _InnerGlowColor;
             fixed _InnerGlowPower;
-#endif
-
-#if defined(_IRIDESCENCE)
-            sampler2D _IridescentSpectrumMap;
-            fixed _IridescenceIntensity;
-            fixed _IridescenceThreshold;
-            fixed _IridescenceAngle;
 #endif
 
 #if defined(_ENVIRONMENT_COLORING)
@@ -615,40 +527,6 @@ ENDCG
             }
 #endif
 
-#if defined(_ROUND_CORNERS)
-            inline float PointVsRoundedBox(float2 position, float2 cornerCircleDistance, float cornerCircleRadius)
-            {
-                return length(max(abs(position) - cornerCircleDistance, 0.0)) - cornerCircleRadius;
-            }
-
-            inline fixed RoundCornersSmooth(float2 position, float2 cornerCircleDistance, float cornerCircleRadius)
-            {
-                return smoothstep(1.0, 0.0, PointVsRoundedBox(position, cornerCircleDistance, cornerCircleRadius) / _EdgeSmoothingValue);
-            }
-
-            inline fixed RoundCorners(float2 position, float2 cornerCircleDistance, float cornerCircleRadius)
-            {
-#if defined(_TRANSPARENT)
-                return RoundCornersSmooth(position, cornerCircleDistance, cornerCircleRadius);
-#else
-                return (PointVsRoundedBox(position, cornerCircleDistance, cornerCircleRadius) < 0.0);
-#endif
-            }
-#endif
-
-#if defined(_IRIDESCENCE)
-            fixed3 Iridescence(float tangentDotIncident, sampler2D spectrumMap, float threshold, float2 uv, float angle, float intensity)
-            {
-                float k = tangentDotIncident * 0.5 + 0.5;
-                float4 left = tex2D(spectrumMap, float2(lerp(0.0, 1.0 - threshold, k), 0.5), float2(0.0, 0.0), float2(0.0, 0.0));
-                float4 right = tex2D(spectrumMap, float2(lerp(threshold, 1.0, k), 0.5), float2(0.0, 0.0), float2(0.0, 0.0));
-
-                float2 XY = uv - float2(0.5, 0.5);
-                float s = (cos(angle) * XY.x - sin(angle) * XY.y) / cos(angle);
-                return (left.rgb + s * (right.rgb - left.rgb)) * intensity;
-            }
-#endif
-
             v2f vert(appdata_t v)
             {
                 v2f o;
@@ -702,80 +580,10 @@ ENDCG
                 o.worldPosition.w = max(saturate(mad(fadeDistance, rangeInverse, -_FadeCompleteDistance * rangeInverse)), _FadeMinValue);
 #endif
 
-#if defined(_SCALE)
-                o.scale.x = length(mul(unity_ObjectToWorld, float4(1.0, 0.0, 0.0, 0.0)));
-                o.scale.y = length(mul(unity_ObjectToWorld, float4(0.0, 1.0, 0.0, 0.0)));
-#if defined(_IGNORE_Z_SCALE)
-                o.scale.z = o.scale.x;
-#else
-                o.scale.z = length(mul(unity_ObjectToWorld, float4(0.0, 0.0, 1.0, 0.0)));
-#endif
-#endif
-
-#if defined(_BORDER_LIGHT) || defined(_ROUND_CORNERS)
-                // o.uv.xy = TRANSFORM_TEX(v.uv, _TexA);
-                o.uv.xy = ProjectToUV(o.worldPosition.xyz, _TexA_ST);
-   
-                float minScale = min(min(o.scale.x, o.scale.y), o.scale.z);
-
-#if defined(_BORDER_LIGHT) 
-                float maxScale = max(max(o.scale.x, o.scale.y), o.scale.z);
-                float minOverMiddleScale = minScale / (o.scale.x + o.scale.y + o.scale.z - minScale - maxScale);
-
-                float areaYZ = o.scale.y * o.scale.z;
-                float areaXZ = o.scale.z * o.scale.x;
-                float areaXY = o.scale.x * o.scale.y;
-
-                float borderWidth = _BorderWidth;
-#endif
-
-                if (abs(v.normal.x) == 1.0) // Y,Z plane.
-                {
-                    o.scale.x = o.scale.z;
-                    o.scale.y = o.scale.y;
-
-#if defined(_BORDER_LIGHT) 
-                    if (areaYZ > areaXZ && areaYZ > areaXY)
-                    {
-                        borderWidth *= minOverMiddleScale;
-                    }
-#endif
-                }
-                else if (abs(v.normal.y) == 1.0) // X,Z plane.
-                {
-                    o.scale.x = o.scale.x;
-                    o.scale.y = o.scale.z;
-
-#if defined(_BORDER_LIGHT) 
-                    if (areaXZ > areaXY && areaXZ > areaYZ)
-                    {
-                        borderWidth *= minOverMiddleScale;
-                    }
-#endif
-                }
-                else  // X,Y plane.
-                {
-                    o.scale.x = o.scale.x;
-                    o.scale.y = o.scale.y;
-
-#if defined(_BORDER_LIGHT) 
-                    if (areaXY > areaYZ && areaXY > areaXZ)
-                    {
-                        borderWidth *= minOverMiddleScale;
-                    }
-#endif
-                }
-
-                o.scale.z = minScale;
-
-#if defined(_BORDER_LIGHT) 
-                float scaleRatio = min(o.scale.x, o.scale.y) / max(o.scale.x, o.scale.y);
-                o.uv.z = IF(o.scale.x > o.scale.y, 1.0 - (borderWidth * scaleRatio), 1.0 - borderWidth);
-                o.uv.w = IF(o.scale.x > o.scale.y, 1.0 - borderWidth, 1.0 - (borderWidth * scaleRatio));
-#endif
-#elif defined(_UV)
-                // o.uv = TRANSFORM_TEX(v.uv, _TexA);
-                o.uv = ProjectToUV(o.worldPosition.xyz, _TexA_ST);
+#if defined(_UV)
+                o.uvA = ProjectToUV(o.worldPosition.xyz, _TexA_ST);
+                o.uvB = ProjectToUV(o.worldPosition.xyz, _TexB_ST);
+                o.uvC = ProjectToUV(o.worldPosition.xyz, _TexC_ST);
 #endif
 
 #if defined(LIGHTMAP_ON)
@@ -788,13 +596,6 @@ ENDCG
 
 #if defined(_SPHERICAL_HARMONICS)
                 o.ambient = ShadeSH9(float4(worldNormal, 1.0));
-#endif
-
-#if defined(_IRIDESCENCE)
-                float3 rightTangent = normalize(mul((float3x3)unity_ObjectToWorld, float3(1.0, 0.0, 0.0)));
-                float3 incidentWithCenter = normalize(mul(unity_ObjectToWorld, float4(0.0, 0.0, 0.0, 1.0)) - _WorldSpaceCameraPos);
-                float tangentDotIncident = dot(rightTangent, incidentWithCenter);
-                o.iridescentColor = Iridescence(tangentDotIncident, _IridescentSpectrumMap, _IridescenceThreshold, v.uv, _IridescenceAngle, _IridescenceIntensity);
 #endif
 
 #if defined(_NORMAL)
@@ -823,18 +624,16 @@ ENDCG
 #endif
 
                 // Texturing.
-                fixed4 albedo = tex2D(_TexA, i.uv);
+                float2 uvA = ApplyWave(i.uvA, _WaveA.xy, _WavePhase, _WaveStretch, _WaveShift);
+                float2 uvB = ApplyWave(i.uvB, _WaveB.xy, _WavePhase, _WaveStretch, _WaveShift);
+                float2 uvC = ApplyWave(i.uvC, _WaveC.xy, _WavePhase, _WaveStretch, _WaveShift);
+                fixed4 albedo = CombineTextures(_TexA, uvA, _TexB, uvB, _TexC, uvC);
+                albedo = pow(albedo, _TextureExponent);
 
 #ifdef LIGHTMAP_ON
                 albedo.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.lightMapUV));
 #endif
 
-#if defined(_CHANNEL_MAP)
-                fixed4 channel = tex2D(_ChannelMap, i.uv);
-                _Metallic = channel.r;
-                albedo.rgb *= channel.g;
-                _Smoothness = channel.a;
-#else
 #if defined(_METALLIC_TEXTURE_ALBEDO_CHANNEL_A)
                 _Metallic = albedo.a;
                 albedo.a = 1.0;
@@ -842,7 +641,6 @@ ENDCG
                 _Smoothness = albedo.a;
                 albedo.a = 1.0;
 #endif 
-#endif
 
                 // Primitive clipping.
 #if defined(_CLIPPING_PRIMITIVE)
@@ -868,17 +666,6 @@ ENDCG
                 distanceToEdge.y = abs(i.uv.y - 0.5) * 2.0;
 #endif
 
-                // Rounded corner clipping.
-#if defined(_ROUND_CORNERS)
-                float2 halfScale = i.scale.xy * 0.5;
-                float2 roundCornerPosition = distanceToEdge * halfScale;
-
-                float cornerCircleRadius = saturate(max(_RoundCornerRadius - _RoundCornerMargin, 0.01)) * i.scale.z;
-                float2 cornerCircleDistance = halfScale - (_RoundCornerMargin * i.scale.z) - cornerCircleRadius;
-
-                float roundCornerClip = RoundCorners(roundCornerPosition, cornerCircleDistance, cornerCircleRadius);
-#endif
-
 #if defined(_INSTANCED_COLOR)
                 albedo *= UNITY_ACCESS_INSTANCED_PROP(Props, _Color);
 #else
@@ -887,10 +674,6 @@ ENDCG
 
 #if defined(_VERTEX_COLORS)
                 albedo *= i.color;
-#endif
-
-#if defined(_IRIDESCENCE)
-                albedo.rgb += i.iridescentColor;
 #endif
 
                 // Normal calculation.
@@ -911,6 +694,9 @@ ENDCG
                 worldNormal = normalize(i.worldNormal) * facing;
 #endif
 #endif
+
+                float albedoFalloff = worldNormal.y;
+                albedo *= albedoFalloff;
 
                 fixed pointToLight = 1.0;
                 fixed3 fluentLightColor = fixed3(0.0, 0.0, 0.0);
@@ -958,43 +744,6 @@ ENDCG
 #endif    
                 }
 #endif    
-
-                // Border light.
-#if defined(_BORDER_LIGHT)
-                fixed borderValue;
-#if defined(_ROUND_CORNERS)
-                fixed borderMargin = _RoundCornerMargin  + _BorderWidth * 0.5;
-                cornerCircleRadius = saturate(max(_RoundCornerRadius - borderMargin, 0.01)) * i.scale.z;
-                cornerCircleDistance = halfScale - (borderMargin * i.scale.z) - cornerCircleRadius;
-
-                borderValue =  1.0 - RoundCornersSmooth(roundCornerPosition, cornerCircleDistance, cornerCircleRadius);
-#else
-                borderValue = max(smoothstep(i.uv.z - _EdgeSmoothingValue, i.uv.z + _EdgeSmoothingValue, distanceToEdge.x),
-                                  smoothstep(i.uv.w - _EdgeSmoothingValue, i.uv.w + _EdgeSmoothingValue, distanceToEdge.y));
-#endif
-#if defined(_HOVER_LIGHT) && defined(_BORDER_LIGHT_USES_HOVER_COLOR) && defined(_HOVER_COLOR_OVERRIDE)
-                fixed3 borderColor = _HoverColorOverride.rgb;
-#else
-                fixed3 borderColor = fixed3(1.0, 1.0, 1.0);
-#endif
-                fixed3 borderContribution = borderColor * borderValue * _BorderMinValue * _FluentLightIntensity;
-#if defined(_BORDER_LIGHT_REPLACES_ALBEDO)
-                albedo.rgb = lerp(albedo.rgb, borderContribution, borderValue);
-#else
-                albedo.rgb += borderContribution;
-#endif
-#if defined(_HOVER_LIGHT) || defined(_PROXIMITY_LIGHT)
-                albedo.rgb += (fluentLightColor * borderValue * pointToLight * _FluentLightIntensity) * 2.0;
-#endif
-#if defined(_BORDER_LIGHT_OPAQUE)
-                albedo.a = max(albedo.a, borderValue * _BorderLightOpaqueAlpha);
-#endif
-#endif
-
-#if defined(_ROUND_CORNERS)
-                albedo *= roundCornerClip;
-                pointToLight *= roundCornerClip;
-#endif
 
 #if defined(_ALPHA_CLIP)
 #if !defined(_ALPHATEST_ON)
@@ -1080,11 +829,7 @@ ENDCG
 #endif
 
 #if defined(_EMISSION)
-#if defined(_CHANNEL_MAP)
-                output.rgb += _EmissiveColor * channel.b;
-#else
                 output.rgb += _EmissiveColor;
-#endif
 #endif
 
                 // Inner glow.
