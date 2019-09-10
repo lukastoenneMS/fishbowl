@@ -96,6 +96,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -164,7 +165,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 50bd8a3038766094f90b06870d86ebe6, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 50bd8a3038766094f90b06870d86ebe6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -291,6 +292,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5616,14 +5618,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43275dcf45f0fd346866314b109d3862, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  settings:
+    InteractionRadius: 1.7
+    CurrentRuleBias: 0
   rules:
   - {fileID: 11400000, guid: 643c3fa56525a1a4f9dc3fd341ff7105, type: 2}
-  - {fileID: 11400000, guid: cf5bcbee4a8520648ae0658d04cfa46a, type: 2}
-  - {fileID: 11400000, guid: 38f59f4e82349e24582462bd869493c1, type: 2}
-  - {fileID: 11400000, guid: c8115e4f06b61cb4ea41c7f3ae565351, type: 2}
-  - {fileID: 11400000, guid: 21663e712c1db454dab54a40460253b7, type: 2}
+  - {fileID: 11400000, guid: 2b56970ce4709574caab20b92f478c8a, type: 2}
+  - {fileID: 11400000, guid: 2c6a32a0b59539b4a90a95b3fdc08bd9, type: 2}
   - {fileID: 0}
-  CurrentRuleBias: 0
 --- !u!114 &669593042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5678,8 +5680,9 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 906070559}
   m_Enabled: 1
-  serializedVersion: 9
+  serializedVersion: 10
   m_Type: 1
+  m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1.4
   m_Range: 100
@@ -5916,7 +5919,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54215e88ad6022043b8e6d64edb64c87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentFrame: 0
+  currentFrame: 85
 --- !u!4 &1977742793
 Transform:
   m_ObjectHideFlags: 0
